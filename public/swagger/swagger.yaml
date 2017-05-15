@@ -1,0 +1,334 @@
+basePath: /api
+consumes:
+- application/json
+- application/xml
+- application/gob
+- application/x-gob
+definitions:
+  Message:
+    description: A Message (default view)
+    example:
+      accountID: 1
+      body: this is chat message
+      postDate: 2002-07-08T14:47:02+09:00
+    properties:
+      accountID:
+        example: 1
+        format: int64
+        type: integer
+      body:
+        example: this is chat message
+        maxLength: 400
+        minLength: 1
+        type: string
+      postDate:
+        default: 1978-06-30T10:00:00+09:00
+        example: 2002-07-08T14:47:02+09:00
+        format: date-time
+        type: string
+    required:
+    - accountID
+    - body
+    - postDate
+    title: 'Mediatype identifier: application/vnd.message+json; view=default'
+    type: object
+  MessageCollection:
+    description: MessageCollection is the media type for an array of Message (default
+      view)
+    example:
+    - accountID: 1
+      body: this is chat message
+      postDate: 2002-07-08T14:47:02+09:00
+    - accountID: 1
+      body: this is chat message
+      postDate: 2002-07-08T14:47:02+09:00
+    - accountID: 1
+      body: this is chat message
+      postDate: 2002-07-08T14:47:02+09:00
+    items:
+      $ref: '#/definitions/Message'
+    title: 'Mediatype identifier: application/vnd.message+json; type=collection; view=default'
+    type: array
+  MessagePayload:
+    example:
+      accountID: 1
+      body: this is chat message
+      postDate: 1994-12-20T11:39:22+09:00
+    properties:
+      accountID:
+        example: 1
+        format: int64
+        type: integer
+      body:
+        example: this is chat message
+        maxLength: 400
+        minLength: 1
+        type: string
+      postDate:
+        default: 1978-06-30T10:00:00+09:00
+        example: 1994-12-20T11:39:22+09:00
+        format: date-time
+        type: string
+    required:
+    - accountID
+    - body
+    - postDate
+    title: MessagePayload
+    type: object
+  Room:
+    description: A room (default view)
+    example:
+      created: 1976-11-05T19:47:09+09:00
+      description: room description
+      id: 5.4174466e+18
+      name: room001
+    properties:
+      created:
+        description: Date of creation
+        example: 1976-11-05T19:47:09+09:00
+        format: date-time
+        type: string
+      description:
+        description: description of room
+        example: room description
+        maxLength: 400
+        type: string
+      id:
+        description: ID of room
+        example: 5.4174466e+18
+        format: int64
+        type: integer
+      name:
+        description: Name of room
+        example: room001
+        type: string
+    required:
+    - name
+    - description
+    title: 'Mediatype identifier: application/vnd.room+json; view=default'
+    type: object
+  RoomCollection:
+    description: RoomCollection is the media type for an array of Room (default view)
+    example:
+    - created: 1976-11-05T19:47:09+09:00
+      description: room description
+      id: 5.4174466e+18
+      name: room001
+    - created: 1976-11-05T19:47:09+09:00
+      description: room description
+      id: 5.4174466e+18
+      name: room001
+    items:
+      $ref: '#/definitions/Room'
+    title: 'Mediatype identifier: application/vnd.room+json; type=collection; view=default'
+    type: array
+  RoomPayload:
+    example:
+      created: 2007-06-24T18:40:57+09:00
+      description: room description
+      id: 7.6111917e+18
+      name: room001
+    properties:
+      created:
+        description: Date of creation
+        example: 2007-06-24T18:40:57+09:00
+        format: date-time
+        type: string
+      description:
+        description: description of room
+        example: room description
+        maxLength: 400
+        type: string
+      id:
+        description: ID of room
+        example: 7.6111917e+18
+        format: int64
+        type: integer
+      name:
+        description: Name of room
+        example: room001
+        type: string
+    required:
+    - name
+    - description
+    title: RoomPayload
+    type: object
+  error:
+    description: Error response media type (default view)
+    example:
+      code: invalid_value
+      detail: Value of ID must be an integer
+      id: 3F1FKVRR
+      meta:
+        timestamp: 1.458609e+09
+      status: "400"
+    properties:
+      code:
+        description: an application-specific error code, expressed as a string value.
+        example: invalid_value
+        type: string
+      detail:
+        description: a human-readable explanation specific to this occurrence of the
+          problem.
+        example: Value of ID must be an integer
+        type: string
+      id:
+        description: a unique identifier for this particular occurrence of the problem.
+        example: 3F1FKVRR
+        type: string
+      meta:
+        additionalProperties: true
+        description: a meta object containing non-standard meta-information about
+          the error.
+        example:
+          timestamp: 1.458609e+09
+        type: object
+      status:
+        description: the HTTP status code applicable to this problem, expressed as
+          a string value.
+        example: "400"
+        type: string
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+    type: object
+host: localhost:8080
+info:
+  description: goa study chat api
+  title: goa study chat
+  version: ""
+paths:
+  /rooms:
+    get:
+      description: Retrieve all rooms.
+      operationId: room#list
+      produces:
+      - application/vnd.room+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RoomCollection'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: list room
+      tags:
+      - room
+    post:
+      description: Create new Room
+      operationId: room#post
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/RoomPayload'
+      produces:
+      - application/vnd.room+json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Room'
+        "400":
+          description: Bad Request
+      schemes:
+      - http
+      summary: post room
+      tags:
+      - room
+  /rooms/{roomID}:
+    get:
+      description: Retrieve room with given id
+      operationId: room#show
+      parameters:
+      - in: path
+        name: roomID
+        required: true
+        type: integer
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.room+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Room'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show room
+      tags:
+      - room
+  /rooms/{roomID}/messages:
+    get:
+      description: Retrieve all messages.
+      operationId: message#list
+      parameters:
+      - in: path
+        name: roomID
+        required: true
+        type: integer
+      produces:
+      - application/vnd.message+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MessageCollection'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: list message
+      tags:
+      - message
+    post:
+      description: Create new message
+      operationId: message#post
+      parameters:
+      - in: path
+        name: roomID
+        required: true
+        type: integer
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/MessagePayload'
+      produces:
+      - application/vnd.message+json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Message'
+        "400":
+          description: Bad Request
+      schemes:
+      - http
+      summary: post message
+      tags:
+      - message
+produces:
+- application/json
+- application/xml
+- application/gob
+- application/x-gob
+responses:
+  BadRequest:
+    description: Bad Request
+  NotFound:
+    description: Not Found
+  OK:
+    description: OK
+    schema:
+      $ref: '#/definitions/Room'
+schemes:
+- http
+swagger: "2.0"
