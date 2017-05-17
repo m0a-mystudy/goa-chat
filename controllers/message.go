@@ -14,6 +14,7 @@ func ToMessageMedia(model *models.Message) *app.Message {
 	ret := app.Message{
 		Body:      model.Body,
 		AccountID: model.AccountID,
+		PostDate:  model.Postdate,
 	}
 	return &ret
 }

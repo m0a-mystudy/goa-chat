@@ -55,7 +55,11 @@ func (c *RoomController) Post(ctx *app.PostRoomContext) error {
 		Description: ctx.Payload.Description,
 		Created:     time.Now(),
 	}
-	return room.Insert(c.db)
+	err := room.Insert(c.db)
+	if err != nil {
+		return err
+	}
+	return ctx.Created(ToRoomMedia(&room))
 }
 
 // Show runs the show action.

@@ -13,6 +13,7 @@ package app
 import (
 	"context"
 	"github.com/goadesign/goa"
+	"github.com/goadesign/goa/cors"
 	"net/http"
 )
 
@@ -42,6 +43,7 @@ type MessageController interface {
 func MountMessageController(service *goa.Service, ctrl MessageController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID/messages", ctrl.MuxHandler("preflight", handleMessageOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -55,6 +57,7 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 		}
 		return ctrl.List(rctx)
 	}
+	h = handleMessageOrigin(h)
 	service.Mux.Handle("GET", "/api/rooms/:roomID/messages", ctrl.MuxHandler("List", h, nil))
 	service.LogInfo("mount", "ctrl", "Message", "action", "List", "route", "GET /api/rooms/:roomID/messages")
 
@@ -76,8 +79,35 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 		}
 		return ctrl.Post(rctx)
 	}
+	h = handleMessageOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms/:roomID/messages", ctrl.MuxHandler("Post", h, unmarshalPostMessagePayload))
 	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages")
+}
+
+// handleMessageOrigin applies the CORS response headers corresponding to the origin.
+func handleMessageOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "http://localhost:3000") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Vary", "Origin")
+			rw.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
 }
 
 // unmarshalPostMessagePayload unmarshals the request body into the context request data Payload field.
@@ -108,6 +138,8 @@ type RoomController interface {
 func MountRoomController(service *goa.Service, ctrl RoomController) {
 	initService(service)
 	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/rooms", ctrl.MuxHandler("preflight", handleRoomOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID", ctrl.MuxHandler("preflight", handleRoomOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -121,6 +153,7 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 		}
 		return ctrl.List(rctx)
 	}
+	h = handleRoomOrigin(h)
 	service.Mux.Handle("GET", "/api/rooms", ctrl.MuxHandler("List", h, nil))
 	service.LogInfo("mount", "ctrl", "Room", "action", "List", "route", "GET /api/rooms")
 
@@ -142,6 +175,7 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 		}
 		return ctrl.Post(rctx)
 	}
+	h = handleRoomOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms", ctrl.MuxHandler("Post", h, unmarshalPostRoomPayload))
 	service.LogInfo("mount", "ctrl", "Room", "action", "Post", "route", "POST /api/rooms")
 
@@ -157,8 +191,35 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 		}
 		return ctrl.Show(rctx)
 	}
+	h = handleRoomOrigin(h)
 	service.Mux.Handle("GET", "/api/rooms/:roomID", ctrl.MuxHandler("Show", h, nil))
 	service.LogInfo("mount", "ctrl", "Room", "action", "Show", "route", "GET /api/rooms/:roomID")
+}
+
+// handleRoomOrigin applies the CORS response headers corresponding to the origin.
+func handleRoomOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "http://localhost:3000") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Vary", "Origin")
+			rw.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
 }
 
 // unmarshalPostRoomPayload unmarshals the request body into the context request data Payload field.

@@ -11,6 +11,13 @@ var _ = API("Chat API", func() {
 	Host("localhost:8080")
 	Scheme("http")
 	BasePath("/api")
+	Origin("http://localhost:3000", func() {
+		Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+		Headers("Origin", "X-Requested-With", "Content-Type", "Accept")
+		// Headers("*")
+		// MaxAge(600)
+		// Credentials()
+	})
 })
 
 var _ = Resource("room", func() {
