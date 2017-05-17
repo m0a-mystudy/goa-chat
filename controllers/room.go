@@ -1,25 +1,33 @@
 package controllers
 
 import (
+	"database/sql"
+	"time"
+
 	"github.com/goadesign/goa"
 	"github.com/m0a-mystudy/goa-chat/app"
-	"github.com/m0a-mystudy/goa-chat/store"
+	"github.com/m0a-mystudy/goa-chat/models"
 )
 
 // ToRoomMedia convert tool
-func ToRoomMedia(room store.RoomModel) *app.Room {
-	ret := app.Room(room)
+func ToRoomMedia(room *models.Room) *app.Room {
+	ret := app.Room{
+		ID:          &room.ID,
+		Description: room.Description,
+		Name:        room.Name,
+		Created:     &room.Created,
+	}
 	return &ret
 }
 
 // RoomController implements the room resource.
 type RoomController struct {
 	*goa.Controller
-	db *store.DB
+	db *sql.DB
 }
 
 // NewRoomController creates a room controller.
-func NewRoomController(service *goa.Service, db *store.DB) *RoomController {
+func NewRoomController(service *goa.Service, db *sql.DB) *RoomController {
 	return &RoomController{
 		Controller: service.NewController("RoomController"),
 		db:         db,
@@ -29,8 +37,12 @@ func NewRoomController(service *goa.Service, db *store.DB) *RoomController {
 // List runs the list action.
 func (c *RoomController) List(ctx *app.ListRoomContext) error {
 	res := app.RoomCollection{}
-	list := c.db.GetRooms()
-	for _, room := range list {
+	rooms, err := models.AllRooms(c.db, 100)
+	if err != nil {
+		return err
+	}
+	// list := c.db.GetRooms()
+	for _, room := range rooms {
 		res = append(res, ToRoomMedia(room))
 	}
 	return ctx.OK(res)
@@ -38,18 +50,24 @@ func (c *RoomController) List(ctx *app.ListRoomContext) error {
 
 // Post runs the post action.
 func (c *RoomController) Post(ctx *app.PostRoomContext) error {
-	model := c.db.NewRoom()
-	saveModel := store.RoomModel(*ctx.Payload)
-	saveModel.ID = model.ID
-	c.db.SaveRoom(saveModel)
-	return nil
+	room := models.Room{
+		Name:        ctx.Payload.Name,
+		Description: ctx.Payload.Description,
+		Created:     time.Now(),
+	}
+	return room.Insert(c.db)
 }
 
 // Show runs the show action.
 func (c *RoomController) Show(ctx *app.ShowRoomContext) error {
-	if room, ok := c.db.GetRoom(ctx.RoomID); ok {
-		res := ToRoomMedia(room)
-		return ctx.OK(res)
+	// if room, ok := c.db.GetRoom(ctx.RoomID); ok {
+	room, err := models.RoomByID(c.db, ctx.RoomID)
+	if err != nil {
+		return err
 	}
-	return ctx.NotFound()
+	if room == nil {
+		return ctx.NotFound()
+	}
+	res := ToRoomMedia(room)
+	return ctx.OK(res)
 }

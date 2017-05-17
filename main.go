@@ -3,11 +3,14 @@
 package main
 
 import (
+	"database/sql"
+
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
 	"github.com/m0a-mystudy/goa-chat/app"
 	"github.com/m0a-mystudy/goa-chat/controllers"
-	"github.com/m0a-mystudy/goa-chat/store"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -20,7 +23,10 @@ func main() {
 	service.Use(middleware.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
 
-	db := store.NewDB()
+	db, err := sql.Open("mysql", "root:sanset6@/goa_chat?parseTime=true")
+	if err != nil {
+		service.LogError("startup", "err", err)
+	}
 	// Mount "message" controller
 	c := controllers.NewMessageController(service, db)
 	app.MountMessageController(service, c)

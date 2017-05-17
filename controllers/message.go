@@ -1,25 +1,31 @@
 package controllers
 
 import (
+	"database/sql"
+	"time"
+
 	"github.com/goadesign/goa"
 	"github.com/m0a-mystudy/goa-chat/app"
-	"github.com/m0a-mystudy/goa-chat/store"
+	"github.com/m0a-mystudy/goa-chat/models"
 )
 
 // ToMessageMedia convert tool
-func ToMessageMedia(model store.MessageModel) *app.Message {
-	ret := app.Message(model)
+func ToMessageMedia(model *models.Message) *app.Message {
+	ret := app.Message{
+		Body:      model.Body,
+		AccountID: model.AccountID,
+	}
 	return &ret
 }
 
 // MessageController implements the message resource.
 type MessageController struct {
 	*goa.Controller
-	db *store.DB
+	db *sql.DB
 }
 
 // NewMessageController creates a message controller.
-func NewMessageController(service *goa.Service, db *store.DB) *MessageController {
+func NewMessageController(service *goa.Service, db *sql.DB) *MessageController {
 	return &MessageController{
 		Controller: service.NewController("MessageController"),
 		db:         db,
@@ -29,7 +35,9 @@ func NewMessageController(service *goa.Service, db *store.DB) *MessageController
 // List runs the list action.
 func (c *MessageController) List(ctx *app.ListMessageContext) error {
 	res := app.MessageCollection{}
-	messages, err := c.db.GetMessages(ctx.RoomID)
+
+	messages, err := models.MessagesByRoomID(c.db, ctx.RoomID)
+	//messages, err := c.db.GetMessages(ctx.RoomID)
 	if err != nil {
 		return err
 	}
@@ -41,11 +49,18 @@ func (c *MessageController) List(ctx *app.ListMessageContext) error {
 
 // Post runs the post action.
 func (c *MessageController) Post(ctx *app.PostMessageContext) error {
-	roomID := ctx.RoomID
-	model := store.MessageModel(*ctx.Payload)
-	if c.db.SaveMessage(roomID, model) != nil {
-		ctx.Created(ToMessageMedia(model))
+	m := models.Message{
+		RoomID:    ctx.RoomID,
+		AccountID: ctx.Payload.AccountID,
+		Body:      ctx.Payload.Body,
+		Postdate:  time.Now(),
 	}
 
-	return ctx.BadRequest()
+	err := m.Insert(c.db)
+	if err != nil {
+		//return err
+		return ctx.BadRequest()
+	}
+
+	return ctx.Created(ToMessageMedia(&m))
 }
