@@ -38,7 +38,6 @@ func (c *MessageController) List(ctx *app.ListMessageContext) error {
 	res := app.MessageCollection{}
 
 	messages, err := models.MessagesByRoomID(c.db, ctx.RoomID)
-	//messages, err := c.db.GetMessages(ctx.RoomID)
 	if err != nil {
 		return err
 	}

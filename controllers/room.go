@@ -41,7 +41,6 @@ func (c *RoomController) List(ctx *app.ListRoomContext) error {
 	if err != nil {
 		return err
 	}
-	// list := c.db.GetRooms()
 	for _, room := range rooms {
 		res = append(res, ToRoomMedia(room))
 	}

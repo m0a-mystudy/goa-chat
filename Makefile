@@ -6,9 +6,6 @@
 # - clean     delete all generated files
 # - generate  (re)generate all goagen-generated files.
 # - build     compile executable
-# - ae-build  build appengine
-# - ae-dev    deploy to local (dev) appengine
-# - ae-deploy deploy to appengine
 #
 # Meta targets:
 # - all is the default target, it runs all the targets in the order above.
