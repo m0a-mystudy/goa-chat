@@ -23,7 +23,7 @@ func main() {
 	service.Use(middleware.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
 
-	db, err := sql.Open("mysql", "root:sanset6@/goa_chat?parseTime=true")
+	db, err := sql.Open("mysql", "user:password@/goa_chat?parseTime=true")
 	if err != nil {
 		service.LogError("startup", "err", err)
 	}
