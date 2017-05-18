@@ -247,8 +247,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.room+json
       - application/vnd.goa.error
+      - application/vnd.room+json
       responses:
         "200":
           description: OK

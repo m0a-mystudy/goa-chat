@@ -4,6 +4,8 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -23,7 +25,20 @@ func main() {
 	service.Use(middleware.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
 
-	db, err := sql.Open("mysql", "user:password@/goa_chat?parseTime=true")
+	user := os.Getenv("MYSQL_USER")
+	if user == "" {
+		service.LogError("startup", "err", fmt.Errorf("MYSQL_USER not found"))
+		os.Exit(-1)
+
+	}
+	pass := os.Getenv("MYSQL_PASSWORD")
+	if pass == "" {
+		service.LogError("startup", "err", fmt.Errorf("MYSQL_PASSWORD not found"))
+		os.Exit(-1)
+	}
+
+	db, err := sql.Open("mysql",
+		fmt.Sprintf("%s:%s@/goa_chat?parseTime=true", user, pass))
 	if err != nil {
 		service.LogError("startup", "err", err)
 	}
