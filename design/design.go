@@ -15,6 +15,15 @@ var _ = API("Chat API", func() {
 		Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
 		Headers("Origin", "X-Requested-With", "Content-Type", "Accept")
 	})
+	ResponseTemplate(Created, func(pattern string) {
+		Description("Resource created")
+		Status(201)
+		Headers(func() {
+			Header("Location", String, "href to created resource", func() {
+				Pattern(pattern)
+			})
+		})
+	})
 })
 
 var _ = Resource("room", func() {
@@ -44,7 +53,7 @@ var _ = Resource("room", func() {
 		Routing(POST(""))
 		Description("Create new Room")
 		Payload(RoomPayload)
-		Response(Created, Room)
+		Response(Created, "/rooms/[0-9]+")
 		Response(BadRequest)
 	})
 
@@ -64,8 +73,21 @@ var _ = Resource("message", func() {
 		Routing(POST(""))
 		Description("Create new message")
 		Payload(MessagePayload)
-		Response(Created, Message)
+		Response(Created, "^/rooms/[0-9]+/messages/[0-9]+$")
 		Response(BadRequest)
+	})
+
+	Action("show", func() {
+		Routing(
+			GET("/:messageID"),
+		)
+		Description("Retrieve message with given id")
+		Params(func() {
+			Param("messageID", Integer)
+		})
+		Response(OK)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
 	})
 
 })

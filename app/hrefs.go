@@ -15,6 +15,13 @@ import (
 	"strings"
 )
 
+// MessageHref returns the resource href.
+func MessageHref(roomID, messageID interface{}) string {
+	paramroomID := strings.TrimLeftFunc(fmt.Sprintf("%v", roomID), func(r rune) bool { return r == '/' })
+	parammessageID := strings.TrimLeftFunc(fmt.Sprintf("%v", messageID), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/rooms/%v/messages/%v", paramroomID, parammessageID)
+}
+
 // RoomHref returns the resource href.
 func RoomHref(roomID interface{}) string {
 	paramroomID := strings.TrimLeftFunc(fmt.Sprintf("%v", roomID), func(r rune) bool { return r == '/' })

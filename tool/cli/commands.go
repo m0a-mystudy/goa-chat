@@ -41,6 +41,13 @@ type (
 		PrettyPrint bool
 	}
 
+	// ShowMessageCommand is the command line data structure for the show action of message
+	ShowMessageCommand struct {
+		MessageID   int
+		RoomID      int
+		PrettyPrint bool
+	}
+
 	// ListRoomCommand is the command line data structure for the list action of room
 	ListRoomCommand struct {
 		PrettyPrint bool
@@ -130,16 +137,25 @@ Payload example:
 	app.AddCommand(command)
 	command = &cobra.Command{
 		Use:   "show",
-		Short: `Retrieve room with given id`,
+		Short: `show action`,
 	}
-	tmp5 := new(ShowRoomCommand)
+	tmp5 := new(ShowMessageCommand)
 	sub = &cobra.Command{
-		Use:   `room ["/api/rooms/ROOMID"]`,
+		Use:   `message ["/api/rooms/ROOMID/messages/MESSAGEID"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
 	tmp5.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp5.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	tmp6 := new(ShowRoomCommand)
+	sub = &cobra.Command{
+		Use:   `room ["/api/rooms/ROOMID"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },
+	}
+	tmp6.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp6.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 }
@@ -354,6 +370,34 @@ func (cmd *PostMessageCommand) Run(c *client.Client, args []string) error {
 func (cmd *PostMessageCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
 	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
+	var roomID int
+	cc.Flags().IntVar(&cmd.RoomID, "roomID", roomID, ``)
+}
+
+// Run makes the HTTP request corresponding to the ShowMessageCommand command.
+func (cmd *ShowMessageCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/api/rooms/%v/messages/%v", cmd.RoomID, cmd.MessageID)
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.ShowMessage(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *ShowMessageCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var messageID int
+	cc.Flags().IntVar(&cmd.MessageID, "messageID", messageID, ``)
 	var roomID int
 	cc.Flags().IntVar(&cmd.RoomID, "roomID", roomID, ``)
 }

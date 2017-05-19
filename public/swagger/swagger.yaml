@@ -223,13 +223,14 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/RoomPayload'
-      produces:
-      - application/vnd.room+json
       responses:
         "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/Room'
+          description: Resource created
+          headers:
+            Location:
+              description: href to created resource
+              pattern: /rooms/[0-9]+
+              type: string
         "400":
           description: Bad Request
       schemes:
@@ -301,18 +302,51 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/MessagePayload'
-      produces:
-      - application/vnd.message+json
       responses:
         "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/Message'
+          description: Resource created
+          headers:
+            Location:
+              description: href to created resource
+              pattern: ^/rooms/[0-9]+/messages/[0-9]+$
+              type: string
         "400":
           description: Bad Request
       schemes:
       - http
       summary: post message
+      tags:
+      - message
+  /rooms/{roomID}/messages/{messageID}:
+    get:
+      description: Retrieve message with given id
+      operationId: message#show
+      parameters:
+      - in: path
+        name: messageID
+        required: true
+        type: integer
+      - in: path
+        name: roomID
+        required: true
+        type: integer
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.message+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show message
       tags:
       - message
 produces:
@@ -328,7 +362,7 @@ responses:
   OK:
     description: OK
     schema:
-      $ref: '#/definitions/Room'
+      $ref: '#/definitions/Message'
 schemes:
 - http
 swagger: "2.0"

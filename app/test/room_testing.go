@@ -217,10 +217,10 @@ func PostRoomBadRequest(t goatest.TInterface, ctx context.Context, service *goa.
 }
 
 // PostRoomCreated runs the method Post of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func PostRoomCreated(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController, payload *app.RoomPayload) (http.ResponseWriter, *app.Room) {
+func PostRoomCreated(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController, payload *app.RoomPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -246,7 +246,7 @@ func PostRoomCreated(t goatest.TInterface, ctx context.Context, service *goa.Ser
 			panic(err) // bug
 		}
 		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil, nil
+		return nil
 	}
 
 	// Setup request context
@@ -279,21 +279,9 @@ func PostRoomCreated(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	if rw.Code != 201 {
 		t.Errorf("invalid response status code: got %+v, expected 201", rw.Code)
 	}
-	var mt *app.Room
-	if resp != nil {
-		var _ok bool
-		mt, _ok = resp.(*app.Room)
-		if !_ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.Room", resp)
-		}
-		__err = mt.Validate()
-		if __err != nil {
-			t.Errorf("invalid response media type: %s", __err)
-		}
-	}
 
 	// Return results
-	return rw, mt
+	return rw
 }
 
 // ShowRoomBadRequest runs the method Show of the given controller with the given parameters.

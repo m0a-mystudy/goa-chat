@@ -37,6 +37,7 @@ type MessageController interface {
 	goa.Muxer
 	List(*ListMessageContext) error
 	Post(*PostMessageContext) error
+	Show(*ShowMessageContext) error
 }
 
 // MountMessageController "mounts" a Message resource controller on the given service.
@@ -44,6 +45,7 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 	initService(service)
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID/messages", ctrl.MuxHandler("preflight", handleMessageOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID/messages/:messageID", ctrl.MuxHandler("preflight", handleMessageOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -82,6 +84,22 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 	h = handleMessageOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms/:roomID/messages", ctrl.MuxHandler("Post", h, unmarshalPostMessagePayload))
 	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowMessageContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleMessageOrigin(h)
+	service.Mux.Handle("GET", "/api/rooms/:roomID/messages/:messageID", ctrl.MuxHandler("Show", h, nil))
+	service.LogInfo("mount", "ctrl", "Message", "action", "Show", "route", "GET /api/rooms/:roomID/messages/:messageID")
 }
 
 // handleMessageOrigin applies the CORS response headers corresponding to the origin.

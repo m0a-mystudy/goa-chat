@@ -95,6 +95,24 @@ define(['axios'] , function (axios) {
     return client(cfg);
   }
 
+  // Retrieve message with given id
+  // path is the request path, the format is "/api/rooms/:roomID/messages/:messageID"
+  // config is an optional object to be merged into the config built by the function prior to making the request.
+  // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
+  // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
+  client.showMessage = function (path, config) {
+    cfg = {
+      timeout: timeout,
+      url: urlPrefix + path,
+      method: 'get',
+      responseType: 'json'
+    };
+    if (config) {
+      cfg = merge(cfg, config);
+    }
+    return client(cfg);
+  }
+
   // Retrieve room with given id
   // path is the request path, the format is "/api/rooms/:roomID"
   // config is an optional object to be merged into the config built by the function prior to making the request.

@@ -92,3 +92,34 @@ func (c *Client) NewPostMessageRequest(ctx context.Context, path string, payload
 	}
 	return req, nil
 }
+
+// ShowMessagePath computes a request path to the show action of message.
+func ShowMessagePath(roomID int, messageID int) string {
+	param0 := strconv.Itoa(roomID)
+	param1 := strconv.Itoa(messageID)
+
+	return fmt.Sprintf("/api/rooms/%s/messages/%s", param0, param1)
+}
+
+// Retrieve message with given id
+func (c *Client) ShowMessage(ctx context.Context, path string) (*http.Response, error) {
+	req, err := c.NewShowMessageRequest(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+	return c.Client.Do(ctx, req)
+}
+
+// NewShowMessageRequest create the request corresponding to the show action endpoint of the message resource.
+func (c *Client) NewShowMessageRequest(ctx context.Context, path string) (*http.Request, error) {
+	scheme := c.Scheme
+	if scheme == "" {
+		scheme = "http"
+	}
+	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}

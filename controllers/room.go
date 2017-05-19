@@ -58,7 +58,8 @@ func (c *RoomController) Post(ctx *app.PostRoomContext) error {
 	if err != nil {
 		return err
 	}
-	return ctx.Created(ToRoomMedia(&room))
+	ctx.ResponseData.Header().Set("Location", app.RoomHref(room.ID))
+	return ctx.Created()
 }
 
 // Show runs the show action.

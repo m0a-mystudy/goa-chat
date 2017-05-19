@@ -62,5 +62,20 @@ func (c *MessageController) Post(ctx *app.PostMessageContext) error {
 		return ctx.BadRequest()
 	}
 
-	return ctx.Created(ToMessageMedia(&m))
+	ctx.Response.Header.Set("Location", app.MessageHref(ctx.RoomID, m.ID))
+	return ctx.Created()
+}
+
+// Show runs the show action.
+func (c *MessageController) Show(ctx *app.ShowMessageContext) error {
+	// if room, ok := c.db.GetRoom(ctx.RoomID); ok {
+	message, err := models.MessageByID(c.db, ctx.MessageID)
+	if err != nil {
+		return err
+	}
+	if message == nil {
+		return ctx.NotFound()
+	}
+	res := ToMessageMedia(message)
+	return ctx.OK(res)
 }

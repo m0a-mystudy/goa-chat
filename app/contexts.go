@@ -92,14 +92,71 @@ func NewPostMessageContext(ctx context.Context, r *http.Request, service *goa.Se
 }
 
 // Created sends a HTTP response with status code 201.
-func (ctx *PostMessageContext) Created(r *Message) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.message+json")
-	return ctx.ResponseData.Service.Send(ctx.Context, 201, r)
+func (ctx *PostMessageContext) Created() error {
+	ctx.ResponseData.WriteHeader(201)
+	return nil
 }
 
 // BadRequest sends a HTTP response with status code 400.
 func (ctx *PostMessageContext) BadRequest() error {
 	ctx.ResponseData.WriteHeader(400)
+	return nil
+}
+
+// ShowMessageContext provides the message show action context.
+type ShowMessageContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	MessageID int
+	RoomID    int
+}
+
+// NewShowMessageContext parses the incoming request URL and body, performs validations and creates the
+// context used by the message controller show action.
+func NewShowMessageContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowMessageContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowMessageContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramMessageID := req.Params["messageID"]
+	if len(paramMessageID) > 0 {
+		rawMessageID := paramMessageID[0]
+		if messageID, err2 := strconv.Atoi(rawMessageID); err2 == nil {
+			rctx.MessageID = messageID
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("messageID", rawMessageID, "integer"))
+		}
+	}
+	paramRoomID := req.Params["roomID"]
+	if len(paramRoomID) > 0 {
+		rawRoomID := paramRoomID[0]
+		if roomID, err2 := strconv.Atoi(rawRoomID); err2 == nil {
+			rctx.RoomID = roomID
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("roomID", rawRoomID, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowMessageContext) OK(r *Message) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.message+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowMessageContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ShowMessageContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
 	return nil
 }
 
@@ -158,9 +215,9 @@ func NewPostRoomContext(ctx context.Context, r *http.Request, service *goa.Servi
 }
 
 // Created sends a HTTP response with status code 201.
-func (ctx *PostRoomContext) Created(r *Room) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.room+json")
-	return ctx.ResponseData.Service.Send(ctx.Context, 201, r)
+func (ctx *PostRoomContext) Created() error {
+	ctx.ResponseData.WriteHeader(201)
+	return nil
 }
 
 // BadRequest sends a HTTP response with status code 400.
