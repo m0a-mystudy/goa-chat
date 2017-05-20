@@ -53,8 +53,6 @@ func (l *WsConnections) updateRoom(roomID int) {
 	}
 	loginfo(l.ctx, "updateRoom", "comms", comms)
 	for _, comm := range comms {
-		// loginfo(l.ctx, "updateRoom", "comm", comm)
-		// ws.Write([]byte(fmt.Sprintf("update %d", roomID)))
 		comm <- struct{}{}
 	}
 }

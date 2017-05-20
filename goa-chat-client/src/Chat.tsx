@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import * as comm from 'chat-client-api';
+import { ChatCell } from './components/ChatCell';
+import { List, TextField, RaisedButton } from 'material-ui';
+
+
 
 type ChatProps = RouteComponentProps<{ roomID: number }>;
 interface ChatState {
@@ -35,12 +39,12 @@ export default class Chat
         const accountID = 10;
         const body = this.state.text;
         const roomID = this.props.match.params.roomID;
-        const options = { 
+        const options = {
             mode: 'cors',
             // credentials: 'include',
             headers: {
                 'content-Type': 'application/json',
-                'accept' : 'application/vnd.message+json'
+                'accept': 'application/vnd.message+json'
             }
         } as {};
         const payload = {
@@ -50,8 +54,9 @@ export default class Chat
         await this.messageAPI.messagePost({
             roomID,
             payload
-        },                                options);
+        }, options);
         await this.fetchMessages();
+        this.setState({ text: '' });
 
     }
     async componentDidMount() {
@@ -66,25 +71,36 @@ export default class Chat
         };
     }
 
-    onChangeText(e: {target: { value: string}}) {
-        this.setState({ text: e.target.value });
+    onChangeText(text: string) {
+        this.setState({ text });
     }
 
     render() {
         const { messages, text } = this.state;
         return (
-            <div>
-                {messages.map(message => {
-                    return (
-                        <div key={`postDate=${message.postDate}`} >
-                            <p>id:{message.accountID}</p>
-                            <p>{message.body}</p>
-                            <p>postDate:{message.postDate}</p>
-                        </div>
-                    );
-                })}
-                <textarea value={text} onChange={e => (this.onChangeText(e))} />
-                <button onClick={() => (this.postMessage())}> submit </button>
+            <div style={{
+
+            }}>
+                <List>
+                    {messages.map(message => {
+                        return (
+                            <ChatCell
+                                key={`postDate=${message.postDate}`}
+                                message={message}
+                            />
+
+                        );
+                    })}
+
+                </List>
+                <TextField
+                    value={text}
+                    onChange={(e, value) => (this.onChangeText(value))}
+                    rows={2}
+                    style={{backgroundColor: "#E0F7FA"}}
+                    fullWidth={true}
+                />
+                <RaisedButton onClick={() => (this.postMessage())}> 送信 </RaisedButton>
             </div>);
     }
 }

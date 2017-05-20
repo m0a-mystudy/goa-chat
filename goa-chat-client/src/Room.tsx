@@ -1,11 +1,22 @@
 import * as React from 'react';
 import { RouteComponentProps, Link } from 'react-router-dom';
 import * as comm from 'chat-client-api';
+import {Card, CardActions, CardHeader, CardText, FlatButton} from 'material-ui';
 
-
-export const RoomCell = (props: { room: comm.Room }) => {
+const RoomCell = (props: { room: comm.Room }) => {
+    const room = props.room;
     return (<div>
-        {props.room.name} <br /> description: {props.room.description} created: {props.room.created}
+        <Card>
+            <CardHeader title={props.room.name} />
+            <CardActions>
+                <Link to={`/room/${room.id}`} key={`${room.name}`} >
+                    <FlatButton label={`${room.name}に入る`} />
+                </Link>
+            </CardActions>
+            <CardText expandable={true}>
+                description: {props.room.description} created: {props.room.created}
+            </CardText>
+        </Card>
     </div>);
 }
 
@@ -97,7 +108,7 @@ export default class Room extends React.Component<RoomProps, RoomState> {
                 {rooms.map(room => {
                     return (
                         <Link to={`/room/${room.id}`} key={`${room.name}`} >
-                            <p>name:{room.name} : {room.description}</p>
+                            <RoomCell room={room} />
                         </Link>
                     );
                 })}
