@@ -81,7 +81,7 @@ export default class Chat
             <div style={{
 
             }}>
-                <List>
+                <List style={{ overflow: 'scroll', height: '500px' }}>
                     {messages.map(message => {
                         return (
                             <ChatCell
@@ -97,7 +97,7 @@ export default class Chat
                     value={text}
                     onChange={(e, value) => (this.onChangeText(value))}
                     rows={2}
-                    style={{backgroundColor: "#E0F7FA"}}
+                    style={{ backgroundColor: '#E0F7FA' }}
                     fullWidth={true}
                 />
                 <RaisedButton onClick={() => (this.postMessage())}> 送信 </RaisedButton>
