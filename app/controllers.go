@@ -150,6 +150,7 @@ type RoomController interface {
 	List(*ListRoomContext) error
 	Post(*PostRoomContext) error
 	Show(*ShowRoomContext) error
+	Watch(*WatchRoomContext) error
 }
 
 // MountRoomController "mounts" a Room resource controller on the given service.
@@ -158,6 +159,7 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 	var h goa.Handler
 	service.Mux.Handle("OPTIONS", "/api/rooms", ctrl.MuxHandler("preflight", handleRoomOrigin(cors.HandlePreflight()), nil))
 	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID", ctrl.MuxHandler("preflight", handleRoomOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/rooms/:roomID/watch", ctrl.MuxHandler("preflight", handleRoomOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -212,6 +214,22 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 	h = handleRoomOrigin(h)
 	service.Mux.Handle("GET", "/api/rooms/:roomID", ctrl.MuxHandler("Show", h, nil))
 	service.LogInfo("mount", "ctrl", "Room", "action", "Show", "route", "GET /api/rooms/:roomID")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewWatchRoomContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Watch(rctx)
+	}
+	h = handleRoomOrigin(h)
+	service.Mux.Handle("GET", "/api/rooms/:roomID/watch", ctrl.MuxHandler("Watch", h, nil))
+	service.LogInfo("mount", "ctrl", "Room", "action", "Watch", "route", "GET /api/rooms/:roomID/watch")
 }
 
 // handleRoomOrigin applies the CORS response headers corresponding to the origin.

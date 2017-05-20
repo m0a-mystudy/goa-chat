@@ -272,3 +272,38 @@ func (ctx *ShowRoomContext) NotFound() error {
 	ctx.ResponseData.WriteHeader(404)
 	return nil
 }
+
+// WatchRoomContext provides the room watch action context.
+type WatchRoomContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	RoomID int
+}
+
+// NewWatchRoomContext parses the incoming request URL and body, performs validations and creates the
+// context used by the room controller watch action.
+func NewWatchRoomContext(ctx context.Context, r *http.Request, service *goa.Service) (*WatchRoomContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := WatchRoomContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramRoomID := req.Params["roomID"]
+	if len(paramRoomID) > 0 {
+		rawRoomID := paramRoomID[0]
+		if roomID, err2 := strconv.Atoi(rawRoomID); err2 == nil {
+			rctx.RoomID = roomID
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("roomID", rawRoomID, "integer"))
+		}
+	}
+	return &rctx, err
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *WatchRoomContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}

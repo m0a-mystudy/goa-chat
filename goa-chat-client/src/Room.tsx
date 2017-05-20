@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { RouteComponentProps, Link } from 'react-router-dom';
-import * as comm from './comm/api';
+import * as comm from 'chat-client-api';
 
 
 export const RoomCell = (props: { room: comm.Room }) => {

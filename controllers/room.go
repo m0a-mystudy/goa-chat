@@ -2,7 +2,11 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
+	"io"
 	"time"
+
+	"golang.org/x/net/websocket"
 
 	"github.com/goadesign/goa"
 	"github.com/m0a-mystudy/goa-chat/app"
@@ -74,4 +78,19 @@ func (c *RoomController) Show(ctx *app.ShowRoomContext) error {
 	}
 	res := ToRoomMedia(room)
 	return ctx.OK(res)
+}
+
+// Watch watches the message with the given id.
+func (c *RoomController) Watch(ctx *app.WatchRoomContext) error {
+	Watcher(ctx.RoomID).ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	return nil
+}
+
+// Echo the data received on the WebSocket.
+func Watcher(roomID int) websocket.Handler {
+	return func(ws *websocket.Conn) {
+		watched := fmt.Sprintf("Room: %d", roomID)
+		ws.Write([]byte(watched))
+		io.Copy(ws, ws)
+	}
 }

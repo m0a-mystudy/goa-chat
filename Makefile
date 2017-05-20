@@ -11,7 +11,7 @@
 # - all is the default target, it runs all the targets in the order above.
 #
 
-all: depend clean generate build
+all: depend clean generate generete-client build
 
 depend:
 	@glide install
@@ -35,8 +35,19 @@ generate:
 	@goagen client  -d github.com/m0a-mystudy/goa-chat/design
 	@goagen js      -d github.com/m0a-mystudy/goa-chat/design -o public
 
+generate-client:
+	@swagger-codegen generate -l typescript-fetch -i ./public/swagger/swagger.json -o ./chat-client-api
+	@jq -s '.[0] * .[1]' chat-client-api/package.json chat-client-api/package_replace.json > replaced_package.json
+	@rm chat-client-api/package.json
+	@mv replaced_package.json chat-client-api/package.json
+
 build:
 	@go build -o chat
+
+build-client:
+	@cd chat-client-api && yarn
+	@cd chat-client-api && npm link
+	
 
 run:
 	@chat

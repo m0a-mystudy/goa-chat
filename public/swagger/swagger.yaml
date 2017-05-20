@@ -349,6 +349,29 @@ paths:
       summary: show message
       tags:
       - message
+  /rooms/{roomID}/watch:
+    get:
+      description: Retrieve room with given id
+      operationId: room#watch
+      parameters:
+      - in: path
+        name: roomID
+        required: true
+        type: integer
+      produces:
+      - application/vnd.goa.error
+      responses:
+        "101":
+          description: Switching Protocols
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - ws
+      summary: watch room
+      tags:
+      - room
 produces:
 - application/json
 - application/xml
@@ -363,6 +386,8 @@ responses:
     description: OK
     schema:
       $ref: '#/definitions/Message'
+  SwitchingProtocols:
+    description: Switching Protocols
 schemes:
 - http
 swagger: "2.0"

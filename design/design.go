@@ -57,6 +57,19 @@ var _ = Resource("room", func() {
 		Response(BadRequest)
 	})
 
+	Action("watch", func() {
+		Routing(
+			GET("/:roomID/watch"),
+		)
+		Scheme("ws")
+		Description("Retrieve room with given id")
+		Params(func() {
+			Param("roomID", Integer)
+		})
+		Response(SwitchingProtocols)
+		Response(BadRequest, ErrorMedia)
+	})
+
 })
 
 var _ = Resource("message", func() {

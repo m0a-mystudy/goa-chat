@@ -11,12 +11,14 @@
     "@types/react-dom": "^15.5.0",
     "@types/react-router": "^4.0.9",
     "@types/react-router-dom": "^4.0.4",
+    "@types/websocket": "^0.0.33",
     "core-js": "^2.4.1",
     "isomorphic-fetch": "^2.2.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-router": "^4.1.1",
-    "react-router-dom": "^4.1.1"
+    "react-router-dom": "^4.1.1",
+    "websocket": "^1.0.24"
   },
   "devDependencies": {
     "react-scripts-ts": "1.4.0"

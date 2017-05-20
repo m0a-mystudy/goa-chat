@@ -65,6 +65,12 @@ type (
 		RoomID      int
 		PrettyPrint bool
 	}
+
+	// WatchRoomCommand is the command line data structure for the watch action of room
+	WatchRoomCommand struct {
+		RoomID      int
+		PrettyPrint bool
+	}
 )
 
 // RegisterCommands registers the resource action CLI commands.
@@ -156,6 +162,20 @@ Payload example:
 	}
 	tmp6.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp6.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "watch",
+		Short: `Retrieve room with given id`,
+	}
+	tmp7 := new(WatchRoomCommand)
+	sub = &cobra.Command{
+		Use:   `room ["/api/rooms/ROOMID/watch"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp7.Run(c, args) },
+	}
+	tmp7.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp7.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 }
@@ -481,6 +501,33 @@ func (cmd *ShowRoomCommand) Run(c *client.Client, args []string) error {
 
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ShowRoomCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var roomID int
+	cc.Flags().IntVar(&cmd.RoomID, "roomID", roomID, ``)
+}
+
+// Run establishes a websocket connection for the WatchRoomCommand command.
+func (cmd *WatchRoomCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/api/rooms/%v/watch", cmd.RoomID)
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	ws, err := c.WatchRoom(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+	go goaclient.WSWrite(ws)
+	goaclient.WSRead(ws)
+
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *WatchRoomCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var roomID int
 	cc.Flags().IntVar(&cmd.RoomID, "roomID", roomID, ``)
 }

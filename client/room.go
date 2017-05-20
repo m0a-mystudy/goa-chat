@@ -14,6 +14,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"golang.org/x/net/websocket"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -119,4 +120,26 @@ func (c *Client) NewShowRoomRequest(ctx context.Context, path string) (*http.Req
 		return nil, err
 	}
 	return req, nil
+}
+
+// WatchRoomPath computes a request path to the watch action of room.
+func WatchRoomPath(roomID int) string {
+	param0 := strconv.Itoa(roomID)
+
+	return fmt.Sprintf("/api/rooms/%s/watch", param0)
+}
+
+// Retrieve room with given id
+func (c *Client) WatchRoom(ctx context.Context, path string) (*websocket.Conn, error) {
+	scheme := c.Scheme
+	if scheme == "" {
+		scheme = "ws"
+	}
+	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
+	url_ := u.String()
+	cfg, err := websocket.NewConfig(url_, url_)
+	if err != nil {
+		return nil, err
+	}
+	return websocket.DialConfig(cfg)
 }
