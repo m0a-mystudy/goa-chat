@@ -2,8 +2,6 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import * as comm from 'chat-client-api';
 
-
-
 type ChatProps = RouteComponentProps<{ roomID: number }>;
 interface ChatState {
     messages: comm.MessageCollection;
@@ -62,20 +60,10 @@ export default class Chat
         const roomID = this.props.match.params.roomID;
         const wsURL = `ws://localhost:8080/api/rooms/${roomID}/watch`;
         const ws = new WebSocket(wsURL);
-        ws.onopen = (ev) => {
-            console.log("onOpen...");
-            ws.send("send message")
+
+        ws.onmessage = async (ev) => {
+            await this.fetchMessages();
         };
-
-        ws.onmessage = (ev) =>{
-            console.log(`onmessage = ${ev.data}`);
-        }
-
-        ws.onclose = (ev) => {
-            console.log("onclose");
-        }
-
-        
     }
 
     onChangeText(e: {target: { value: string}}) {
