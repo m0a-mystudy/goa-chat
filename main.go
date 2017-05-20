@@ -42,11 +42,13 @@ func main() {
 	if err != nil {
 		service.LogError("startup", "err", err)
 	}
+
+	wsConns := controllers.NewConnections(service.Context)
 	// Mount "message" controller
-	c := controllers.NewMessageController(service, db)
+	c := controllers.NewMessageController(service, db, wsConns)
 	app.MountMessageController(service, c)
 	// Mount "room" controller
-	c2 := controllers.NewRoomController(service, db)
+	c2 := controllers.NewRoomController(service, db, wsConns)
 	app.MountRoomController(service, c2)
 
 	// Start service

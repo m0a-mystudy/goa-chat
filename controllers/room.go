@@ -3,7 +3,6 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
-	"io"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -27,14 +26,16 @@ func ToRoomMedia(room *models.Room) *app.Room {
 // RoomController implements the room resource.
 type RoomController struct {
 	*goa.Controller
-	db *sql.DB
+	db          *sql.DB
+	connections *WsConnections
 }
 
 // NewRoomController creates a room controller.
-func NewRoomController(service *goa.Service, db *sql.DB) *RoomController {
+func NewRoomController(service *goa.Service, db *sql.DB, wsc *WsConnections) *RoomController {
 	return &RoomController{
-		Controller: service.NewController("RoomController"),
-		db:         db,
+		Controller:  service.NewController("RoomController"),
+		db:          db,
+		connections: wsc,
 	}
 }
 
@@ -62,7 +63,9 @@ func (c *RoomController) Post(ctx *app.PostRoomContext) error {
 	if err != nil {
 		return err
 	}
-	ctx.ResponseData.Header().Set("Location", app.RoomHref(room.ID))
+	str := app.RoomHref(room.ID)
+	loginfo(ctx, "str,", str)
+	ctx.ResponseData.Header().Set("", app.RoomHref(room.ID))
 	return ctx.Created()
 }
 
@@ -82,15 +85,22 @@ func (c *RoomController) Show(ctx *app.ShowRoomContext) error {
 
 // Watch watches the message with the given id.
 func (c *RoomController) Watch(ctx *app.WatchRoomContext) error {
-	Watcher(ctx.RoomID).ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	Watcher(ctx.RoomID, c, ctx).ServeHTTP(ctx.ResponseWriter, ctx.Request)
 	return nil
 }
 
-// Echo the data received on the WebSocket.
-func Watcher(roomID int) websocket.Handler {
+// Roomの変更通知の送信
+func Watcher(roomID int, c *RoomController, ctx *app.WatchRoomContext) websocket.Handler {
 	return func(ws *websocket.Conn) {
-		watched := fmt.Sprintf("Room: %d", roomID)
-		ws.Write([]byte(watched))
-		io.Copy(ws, ws)
+		ch := make(chan struct{})
+		c.connections.apendConn(roomID, ch)
+		for {
+			<-ch
+			_, err := ws.Write([]byte(fmt.Sprintf("Room: %d", roomID)))
+			if err != nil {
+				break
+			}
+		}
+		c.connections.removeConn(roomID, ch)
 	}
 }

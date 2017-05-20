@@ -22,14 +22,16 @@ func ToMessageMedia(model *models.Message) *app.Message {
 // MessageController implements the message resource.
 type MessageController struct {
 	*goa.Controller
-	db *sql.DB
+	db          *sql.DB
+	connections *WsConnections
 }
 
 // NewMessageController creates a message controller.
-func NewMessageController(service *goa.Service, db *sql.DB) *MessageController {
+func NewMessageController(service *goa.Service, db *sql.DB, wsc *WsConnections) *MessageController {
 	return &MessageController{
-		Controller: service.NewController("MessageController"),
-		db:         db,
+		Controller:  service.NewController("MessageController"),
+		db:          db,
+		connections: wsc,
 	}
 }
 
@@ -61,8 +63,8 @@ func (c *MessageController) Post(ctx *app.PostMessageContext) error {
 		//return err
 		return ctx.BadRequest()
 	}
-
-	ctx.Response.Header.Set("Location", app.MessageHref(ctx.RoomID, m.ID))
+	c.connections.updateRoom(ctx.RoomID)
+	ctx.ResponseData.Header().Set("Location", app.MessageHref(ctx.RoomID, m.ID))
 	return ctx.Created()
 }
 
