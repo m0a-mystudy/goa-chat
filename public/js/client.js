@@ -19,6 +19,24 @@ define(['axios'] , function (axios) {
     // URL prefix for all API requests.
     var urlPrefix = scheme + '://' + host;
 
+  // Retrieve all accunts.
+  // path is the request path, the format is "/api/accounts"
+  // config is an optional object to be merged into the config built by the function prior to making the request.
+  // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
+  // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
+  client.listAccount = function (path, config) {
+    cfg = {
+      timeout: timeout,
+      url: urlPrefix + path,
+      method: 'get',
+      responseType: 'json'
+    };
+    if (config) {
+      cfg = merge(cfg, config);
+    }
+    return client(cfg);
+  }
+
   // Retrieve all messages.
   // path is the request path, the format is "/api/rooms/:roomID/messages"
   // config is an optional object to be merged into the config built by the function prior to making the request.
@@ -47,6 +65,26 @@ define(['axios'] , function (axios) {
       timeout: timeout,
       url: urlPrefix + path,
       method: 'get',
+      responseType: 'json'
+    };
+    if (config) {
+      cfg = merge(cfg, config);
+    }
+    return client(cfg);
+  }
+
+  // Create new account
+  // path is the request path, the format is "/api/accounts"
+  // data contains the action payload (request body)
+  // config is an optional object to be merged into the config built by the function prior to making the request.
+  // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
+  // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
+  client.postAccount = function (path, data, config) {
+    cfg = {
+      timeout: timeout,
+      url: urlPrefix + path,
+      method: 'post',
+    data: data,
       responseType: 'json'
     };
     if (config) {
@@ -87,6 +125,24 @@ define(['axios'] , function (axios) {
       url: urlPrefix + path,
       method: 'post',
     data: data,
+      responseType: 'json'
+    };
+    if (config) {
+      cfg = merge(cfg, config);
+    }
+    return client(cfg);
+  }
+
+  // Retrieve account with given id or something
+  // path is the request path, the format is "/api/accounts/:user"
+  // config is an optional object to be merged into the config built by the function prior to making the request.
+  // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
+  // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
+  client.showAccount = function (path, config) {
+    cfg = {
+      timeout: timeout,
+      url: urlPrefix + path,
+      method: 'get',
       responseType: 'json'
     };
     if (config) {

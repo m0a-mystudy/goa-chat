@@ -32,6 +32,118 @@ func initService(service *goa.Service) {
 	service.Decoder.Register(goa.NewJSONDecoder, "*/*")
 }
 
+// AccountController is the controller interface for the Account actions.
+type AccountController interface {
+	goa.Muxer
+	List(*ListAccountContext) error
+	Post(*PostAccountContext) error
+	Show(*ShowAccountContext) error
+}
+
+// MountAccountController "mounts" a Account resource controller on the given service.
+func MountAccountController(service *goa.Service, ctrl AccountController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/api/accounts", ctrl.MuxHandler("preflight", handleAccountOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/api/accounts/:user", ctrl.MuxHandler("preflight", handleAccountOrigin(cors.HandlePreflight()), nil))
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewListAccountContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.List(rctx)
+	}
+	h = handleAccountOrigin(h)
+	service.Mux.Handle("GET", "/api/accounts", ctrl.MuxHandler("List", h, nil))
+	service.LogInfo("mount", "ctrl", "Account", "action", "List", "route", "GET /api/accounts")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewPostAccountContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*MessagePayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Post(rctx)
+	}
+	h = handleAccountOrigin(h)
+	service.Mux.Handle("POST", "/api/accounts", ctrl.MuxHandler("Post", h, unmarshalPostAccountPayload))
+	service.LogInfo("mount", "ctrl", "Account", "action", "Post", "route", "POST /api/accounts")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowAccountContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Show(rctx)
+	}
+	h = handleAccountOrigin(h)
+	service.Mux.Handle("GET", "/api/accounts/:user", ctrl.MuxHandler("Show", h, nil))
+	service.LogInfo("mount", "ctrl", "Account", "action", "Show", "route", "GET /api/accounts/:user")
+}
+
+// handleAccountOrigin applies the CORS response headers corresponding to the origin.
+func handleAccountOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "http://localhost:3000") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Vary", "Origin")
+			rw.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Csrftoken, Authorization")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}
+
+// unmarshalPostAccountPayload unmarshals the request body into the context request data Payload field.
+func unmarshalPostAccountPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &messagePayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	payload.Finalize()
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
 // MessageController is the controller interface for the Message actions.
 type MessageController interface {
 	goa.Muxer
@@ -81,9 +193,10 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 		}
 		return ctrl.Post(rctx)
 	}
+	h = handleSecurity("basic_auth", h)
 	h = handleMessageOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms/:roomID/messages", ctrl.MuxHandler("Post", h, unmarshalPostMessagePayload))
-	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages")
+	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages", "security", "basic_auth")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -119,7 +232,7 @@ func handleMessageOrigin(h goa.Handler) goa.Handler {
 			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
 				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Csrftoken, Authorization")
 			}
 			return h(ctx, rw, req)
 		}
@@ -195,9 +308,10 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 		}
 		return ctrl.Post(rctx)
 	}
+	h = handleSecurity("basic_auth", h)
 	h = handleRoomOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms", ctrl.MuxHandler("Post", h, unmarshalPostRoomPayload))
-	service.LogInfo("mount", "ctrl", "Room", "action", "Post", "route", "POST /api/rooms")
+	service.LogInfo("mount", "ctrl", "Room", "action", "Post", "route", "POST /api/rooms", "security", "basic_auth")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -249,7 +363,7 @@ func handleRoomOrigin(h goa.Handler) goa.Handler {
 			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
 				// We are handling a preflight request
 				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Csrftoken, Authorization")
 			}
 			return h(ctx, rw, req)
 		}

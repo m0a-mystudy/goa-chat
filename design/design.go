@@ -5,6 +5,9 @@ import (
 	. "github.com/goadesign/goa/design/apidsl"
 )
 
+// BasicAuth defines a security scheme using basic authentication.
+var BasicAuth = BasicAuthSecurity("basic_auth")
+
 var _ = API("Chat API", func() {
 	Title("goa study chat") // Documentation title
 	Description("goa study chat api")
@@ -13,7 +16,9 @@ var _ = API("Chat API", func() {
 	BasePath("/api")
 	Origin("http://localhost:3000", func() {
 		Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-		Headers("Origin", "X-Requested-With", "Content-Type", "Accept")
+		Headers("Origin", "X-Requested-With", "Content-Type", "Accept",
+			"X-Csrftoken", "Authorization")
+		// Expose("Authorization")
 	})
 	ResponseTemplate(Created, func(pattern string) {
 		Description("Resource created")
@@ -53,6 +58,8 @@ var _ = Resource("room", func() {
 		Routing(POST(""))
 		Description("Create new Room")
 		Payload(RoomPayload)
+		Security(BasicAuth)
+
 		Response(Created, "/rooms/[0-9]+")
 		Response(BadRequest)
 	})
@@ -85,6 +92,8 @@ var _ = Resource("message", func() {
 	Action("post", func() {
 		Routing(POST(""))
 		Description("Create new message")
+		Security(BasicAuth)
+
 		Payload(MessagePayload)
 		Response(Created, "^/rooms/[0-9]+/messages/[0-9]+$")
 		Response(BadRequest)
@@ -97,6 +106,38 @@ var _ = Resource("message", func() {
 		Description("Retrieve message with given id")
 		Params(func() {
 			Param("messageID", Integer)
+		})
+		Response(OK)
+		Response(NotFound)
+		Response(BadRequest, ErrorMedia)
+	})
+
+})
+
+var _ = Resource("account", func() {
+	DefaultMedia(Account)
+	BasePath("accounts")
+	Action("list", func() {
+		Routing(GET(""))
+		Description("Retrieve all accunts.")
+		Response(OK, CollectionOf(Account))
+		Response(NotFound)
+	})
+	Action("post", func() {
+		Routing(POST(""))
+		Description("Create new account")
+		Payload(MessagePayload)
+		Response(Created, "^/accounts/[0-9]+$")
+		Response(BadRequest)
+	})
+
+	Action("show", func() {
+		Routing(
+			GET("/:user"),
+		)
+		Description("Retrieve account with given id or something")
+		Params(func() {
+			Param("user", String)
 		})
 		Response(OK)
 		Response(NotFound)
@@ -168,4 +209,21 @@ var RoomPayload = Type("RoomPayload", func() {
 	})
 	Attribute("created", DateTime, "Date of creation")
 	Required("name", "description")
+})
+
+var Account = MediaType("application/vnd.account+json", func() {
+	Description("A account")
+	Reference(RoomPayload)
+	Attributes(func() {
+		Attribute("id", String)
+		Attribute("password", String)
+		Attribute("created", DateTime)
+		Required("id", "password", "created")
+	})
+
+	View("default", func() {
+		Attribute("id")
+		Attribute("password")
+		Attribute("created")
+	})
 })

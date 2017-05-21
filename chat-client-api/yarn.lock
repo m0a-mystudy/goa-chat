@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/base-64@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@types/base-64/-/base-64-0.1.2.tgz#63ac318302cdabb5f04e8ae2a56e54d4832107e2"
+
 abbrev@1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.0.tgz#d0554c2256636e2f56e7c2e5ad183f859428d81f"
@@ -54,6 +58,10 @@ asynckit@^0.4.0:
 balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
+
+base-64@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/base-64/-/base-64-0.1.0.tgz#780a99c84e7d600260361511c4877613bf24f6bb"
 
 bluebird@^3.1.1:
   version "3.5.0"

@@ -1,36 +1,27 @@
 import * as React from 'react';
 import { RouteComponentProps, Link } from 'react-router-dom';
 import * as comm from 'chat-client-api';
-import {Card, CardActions, CardHeader, CardText, FlatButton} from 'material-ui';
+import { Card, CardActions, CardHeader, CardText, FlatButton } from 'material-ui';
+// import * as base64 from 'base-64';
+
 
 const RoomCell = (props: { room: comm.Room }) => {
     const room = props.room;
-    return (<div>
-        <Card>
-            <CardHeader title={props.room.name} />
-            <CardActions>
-                <Link to={`/room/${room.id}`} key={`${room.name}`} >
-                    <FlatButton label={`${room.name}に入る`} />
-                </Link>
-            </CardActions>
-            <CardText expandable={true}>
-                description: {props.room.description} created: {props.room.created}
-            </CardText>
-        </Card>
-    </div>);
-}
-
-// 例外オブジェクトからスタックトレースを出力する関数。
-function printStackTrace(e: any) {
-    if (e.stack) {
-        // 出力方法は、使いやすいように修正する。
-        console.log(e.stack);
-        alert(e.stack);
-    } else {
-        // stackがない場合には、そのままエラー情報を出す。
-        console.log(e.message, e);
-    }
-}
+    return (
+        <div>
+            <Card>
+                <CardHeader title={props.room.name} />
+                <CardActions>
+                    <Link to={`/room/${room.id}`} key={`${room.name}`} >
+                        <FlatButton label={`${room.name}に入る`} />
+                    </Link>
+                </CardActions>
+                <CardText expandable={true}>
+                    description: {props.room.description} created: {props.room.created}
+                </CardText>
+            </Card>
+        </div>);
+};
 
 type RoomProps = RouteComponentProps<{ roomID: number }>;
 interface RoomState {
@@ -65,12 +56,17 @@ export default class Room extends React.Component<RoomProps, RoomState> {
     async postRoom() {
         const name = this.state.roomName;
         const description = this.state.roomDescription;
+        // let headers = new Headers();
+        // headers.append('Authorization', 'Basic ' + base64.encode('abe:pass'));
+        // headers.append('Content-Type', 'application/json');
+        // headers.append('Accept', 'application/vnd.room+json');
         const options = {
             mode: 'cors',
-            // credentials: 'include',
+            // credentials: 'include', 
             headers: {
-                'content-Type': 'application/json',
-                'accept': 'application/vnd.room+json'
+                // 'Authorization' : 'Basic ' + base64.encode("abe" + ":" + "pass")
+                // 'Content-Type': 'application/json'
+                // 'Accept': 'application/vnd.room+json'
             }
         } as {};
         const payload = {
@@ -81,9 +77,8 @@ export default class Room extends React.Component<RoomProps, RoomState> {
             await this.roomAPI.roomPost({ payload }, options);
             await this.fetchRooms();
         } catch (e) {
-            printStackTrace(e);
+            console.log(e);
         }
-
 
     }
     async componentDidMount() {

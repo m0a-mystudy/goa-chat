@@ -17,6 +17,115 @@ import (
 	"strconv"
 )
 
+// ListAccountContext provides the account list action context.
+type ListAccountContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+}
+
+// NewListAccountContext parses the incoming request URL and body, performs validations and creates the
+// context used by the account controller list action.
+func NewListAccountContext(ctx context.Context, r *http.Request, service *goa.Service) (*ListAccountContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ListAccountContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ListAccountContext) OK(r AccountCollection) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.account+json; type=collection")
+	if r == nil {
+		r = AccountCollection{}
+	}
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ListAccountContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// PostAccountContext provides the account post action context.
+type PostAccountContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Payload *MessagePayload
+}
+
+// NewPostAccountContext parses the incoming request URL and body, performs validations and creates the
+// context used by the account controller post action.
+func NewPostAccountContext(ctx context.Context, r *http.Request, service *goa.Service) (*PostAccountContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := PostAccountContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// Created sends a HTTP response with status code 201.
+func (ctx *PostAccountContext) Created() error {
+	ctx.ResponseData.WriteHeader(201)
+	return nil
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *PostAccountContext) BadRequest() error {
+	ctx.ResponseData.WriteHeader(400)
+	return nil
+}
+
+// ShowAccountContext provides the account show action context.
+type ShowAccountContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	User string
+}
+
+// NewShowAccountContext parses the incoming request URL and body, performs validations and creates the
+// context used by the account controller show action.
+func NewShowAccountContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowAccountContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowAccountContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramUser := req.Params["user"]
+	if len(paramUser) > 0 {
+		rawUser := paramUser[0]
+		rctx.User = rawUser
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowAccountContext) OK(r *Account) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.account+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *ShowAccountContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ShowAccountContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
 // ListMessageContext provides the message list action context.
 type ListMessageContext struct {
 	context.Context

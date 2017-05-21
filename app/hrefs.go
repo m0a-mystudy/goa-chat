@@ -15,6 +15,12 @@ import (
 	"strings"
 )
 
+// AccountHref returns the resource href.
+func AccountHref(user interface{}) string {
+	paramuser := strings.TrimLeftFunc(fmt.Sprintf("%v", user), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/api/accounts/%v", paramuser)
+}
+
 // MessageHref returns the resource href.
 func MessageHref(roomID, messageID interface{}) string {
 	paramroomID := strings.TrimLeftFunc(fmt.Sprintf("%v", roomID), func(r rune) bool { return r == '/' })

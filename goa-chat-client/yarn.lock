@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@types/base-64@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@types/base-64/-/base-64-0.1.2.tgz#63ac318302cdabb5f04e8ae2a56e54d4832107e2"
+
 "@types/core-js@^0.9.41":
   version "0.9.41"
   resolved "https://registry.yarnpkg.com/@types/core-js/-/core-js-0.9.41.tgz#cfeceb63c2beaa29f882252c7c18e0e9471ff4e2"
@@ -18,9 +22,22 @@
   version "19.2.3"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-19.2.3.tgz#61748040e8589a891dfc2ec1d16a2dd74482980e"
 
+"@types/material-ui@0.17.7":
+  version "0.17.7"
+  resolved "https://registry.yarnpkg.com/@types/material-ui/-/material-ui-0.17.7.tgz#dc546c5ac981ae63c624e0774708649acf23051f"
+  dependencies:
+    "@types/react" "*"
+    "@types/react-addons-linked-state-mixin" "*"
+
 "@types/node@*", "@types/node@^7.0.18":
   version "7.0.18"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.18.tgz#cd67f27d3dc0cfb746f0bdd5e086c4c5d55be173"
+
+"@types/react-addons-linked-state-mixin@*":
+  version "0.14.17"
+  resolved "https://registry.yarnpkg.com/@types/react-addons-linked-state-mixin/-/react-addons-linked-state-mixin-0.14.17.tgz#2e82b5b0882410279a7ab6b675e6f49eb3de8419"
+  dependencies:
+    "@types/react" "*"
 
 "@types/react-dom@^15.5.0":
   version "15.5.0"
@@ -410,6 +427,10 @@ babylon@^6.11.0, babylon@^6.13.0, babylon@^6.15.0:
 balanced-match@^0.4.1, balanced-match@^0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
+
+base-64@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/base-64/-/base-64-0.1.0.tgz#780a99c84e7d600260361511c4877613bf24f6bb"
 
 base64-js@^1.0.2:
   version "1.2.0"

@@ -15,7 +15,7 @@
         }
       });
       requirejs(['client'], function (client) {
-        client().listMessage ("/api/rooms/5885840883998769908/messages")
+        client().listAccount ("/api/accounts")
           .then(function (resp) {
             document.getElementById('response').innerHTML = resp.statusText;
           })

@@ -37,6 +37,27 @@ export class BaseAPI {
 };
 
 /**
+ * A account (default view)
+ */
+export interface Account {
+    /**
+     * Date of creation
+     */
+    "created": Date;
+    /**
+     * ID of room
+     */
+    "id": string;
+    "password": string;
+}
+
+/**
+ * AccountCollection is the media type for an array of Account (default view)
+ */
+export interface AccountCollection extends Array<Account> {
+}
+
+/**
  * Error response media type (default view)
  */
 export interface Error {
@@ -133,6 +154,202 @@ export interface RoomPayload {
 
 
 /**
+ * AccountApi - fetch parameter creator
+ */
+export const AccountApiFetchParamCreator = {
+    /** 
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList(options?: any): FetchArgs {
+        const baseUrl = `/accounts`;
+        let urlObj = url.parse(baseUrl, true);
+        let fetchOptions: RequestInit = assign({}, { method: "GET" }, options);
+
+        let contentTypeHeader: Dictionary<string> = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /** 
+     * post account
+     * Create new account
+     * @param payload 
+     */
+    accountPost(params: {  "payload": MessagePayload; }, options?: any): FetchArgs {
+        // verify required parameter "payload" is set
+        if (params["payload"] == null) {
+            throw new Error("Missing required parameter payload when calling accountPost");
+        }
+        const baseUrl = `/accounts`;
+        let urlObj = url.parse(baseUrl, true);
+        let fetchOptions: RequestInit = assign({}, { method: "POST" }, options);
+
+        let contentTypeHeader: Dictionary<string> = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
+        if (params["payload"]) {
+            fetchOptions.body = JSON.stringify(params["payload"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /** 
+     * show account
+     * Retrieve account with given id or something
+     * @param user 
+     */
+    accountShow(params: {  "user": string; }, options?: any): FetchArgs {
+        // verify required parameter "user" is set
+        if (params["user"] == null) {
+            throw new Error("Missing required parameter user when calling accountShow");
+        }
+        const baseUrl = `/accounts/{user}`
+            .replace(`{${"user"}}`, `${ params["user"] }`);
+        let urlObj = url.parse(baseUrl, true);
+        let fetchOptions: RequestInit = assign({}, { method: "GET" }, options);
+
+        let contentTypeHeader: Dictionary<string> = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+};
+
+/**
+ * AccountApi - functional programming interface
+ */
+export const AccountApiFp = {
+    /** 
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountCollection> {
+        const fetchArgs = AccountApiFetchParamCreator.accountList(options);
+        return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                } else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /** 
+     * post account
+     * Create new account
+     * @param payload 
+     */
+    accountPost(params: { "payload": MessagePayload;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any> {
+        const fetchArgs = AccountApiFetchParamCreator.accountPost(params, options);
+        return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response;
+                } else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /** 
+     * show account
+     * Retrieve account with given id or something
+     * @param user 
+     */
+    accountShow(params: { "user": string;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Account> {
+        const fetchArgs = AccountApiFetchParamCreator.accountShow(params, options);
+        return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                } else {
+                    throw response;
+                }
+            });
+        };
+    },
+};
+
+/**
+ * AccountApi - object-oriented interface
+ */
+export class AccountApi extends BaseAPI {
+    /** 
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList(options?: any) {
+        return AccountApiFp.accountList(options)(this.fetch, this.basePath);
+    }
+    /** 
+     * post account
+     * Create new account
+     * @param payload 
+     */
+    accountPost(params: {  "payload": MessagePayload; }, options?: any) {
+        return AccountApiFp.accountPost(params, options)(this.fetch, this.basePath);
+    }
+    /** 
+     * show account
+     * Retrieve account with given id or something
+     * @param user 
+     */
+    accountShow(params: {  "user": string; }, options?: any) {
+        return AccountApiFp.accountShow(params, options)(this.fetch, this.basePath);
+    }
+};
+
+/**
+ * AccountApi - factory interface
+ */
+export const AccountApiFactory = function (fetch?: FetchAPI, basePath?: string) {
+    return {
+        /** 
+         * list account
+         * Retrieve all accunts.
+         */
+        accountList(options?: any) {
+            return AccountApiFp.accountList(options)(fetch, basePath);
+        },
+        /** 
+         * post account
+         * Create new account
+         * @param payload 
+         */
+        accountPost(params: {  "payload": MessagePayload; }, options?: any) {
+            return AccountApiFp.accountPost(params, options)(fetch, basePath);
+        },
+        /** 
+         * show account
+         * Retrieve account with given id or something
+         * @param user 
+         */
+        accountShow(params: {  "user": string; }, options?: any) {
+            return AccountApiFp.accountShow(params, options)(fetch, basePath);
+        },
+    };
+};
+
+
+/**
  * MessageApi - fetch parameter creator
  */
 export const MessageApiFetchParamCreator = {
@@ -182,6 +399,9 @@ export const MessageApiFetchParamCreator = {
 
         let contentTypeHeader: Dictionary<string> = {};
         contentTypeHeader = { "Content-Type": "application/json" };
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
         if (params["payload"]) {
             fetchOptions.body = JSON.stringify(params["payload"] || {});
         }
@@ -389,6 +609,10 @@ export const RoomApiFetchParamCreator = {
 
         let contentTypeHeader: Dictionary<string> = {};
         contentTypeHeader = { "Content-Type": "application/json" };
+        
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
         if (params["payload"]) {
             fetchOptions.body = JSON.stringify(params["payload"] || {});
         }

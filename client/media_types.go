@@ -17,6 +17,60 @@ import (
 	"unicode/utf8"
 )
 
+// A account (default view)
+//
+// Identifier: application/vnd.account+json; view=default
+type Account struct {
+	// Date of creation
+	Created time.Time `form:"created" json:"created" xml:"created"`
+	// ID of room
+	ID       string `form:"id" json:"id" xml:"id"`
+	Password string `form:"password" json:"password" xml:"password"`
+}
+
+// Validate validates the Account media type instance.
+func (mt *Account) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.Password == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "password"))
+	}
+
+	return
+}
+
+// DecodeAccount decodes the Account instance encoded in resp body.
+func (c *Client) DecodeAccount(resp *http.Response) (*Account, error) {
+	var decoded Account
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return &decoded, err
+}
+
+// AccountCollection is the media type for an array of Account (default view)
+//
+// Identifier: application/vnd.account+json; type=collection; view=default
+type AccountCollection []*Account
+
+// Validate validates the AccountCollection media type instance.
+func (mt AccountCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// DecodeAccountCollection decodes the AccountCollection instance encoded in resp body.
+func (c *Client) DecodeAccountCollection(resp *http.Response) (AccountCollection, error) {
+	var decoded AccountCollection
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return decoded, err
+}
+
 // DecodeErrorResponse decodes the ErrorResponse instance encoded in resp body.
 func (c *Client) DecodeErrorResponse(resp *http.Response) (*goa.ErrorResponse, error) {
 	var decoded goa.ErrorResponse

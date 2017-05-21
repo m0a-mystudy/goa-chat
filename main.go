@@ -3,8 +3,10 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/goadesign/goa"
@@ -15,6 +17,36 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var (
+	// ErrUnauthorized is the error returned for unauthorized requests.
+	ErrUnauthorized = goa.NewErrorClass("unauthorized", 401)
+)
+
+// NewBasicAuthMiddleware creates a middleware that checks for the presence of a basic auth header
+// and validates its content.
+func NewBasicAuthMiddleware() goa.Middleware {
+	return func(h goa.Handler) goa.Handler {
+		return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+
+			goa.LogInfo(ctx, "header", fmt.Sprintf("<%s>", req.Header.Get("Authorization")))
+			// Retrieve and log basic auth info
+			user, pass, ok := req.BasicAuth()
+			// A real app would do something more interesting here
+			if !ok {
+				goa.LogInfo(ctx, "failed basic auth")
+				return ErrUnauthorized("missing auth")
+			}
+			if user != "abe" || pass != "pass" {
+				return ErrUnauthorized("invalid auth")
+			}
+
+			// Proceed
+			goa.LogInfo(ctx, "basic", "user", user, "pass", pass)
+			return h(ctx, rw, req)
+		}
+	}
+}
+
 func main() {
 	// Create service
 	service := goa.New("Chat API")
@@ -24,6 +56,9 @@ func main() {
 	service.Use(middleware.LogRequest(true))
 	service.Use(middleware.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
+
+	// Mount security middlewares
+	app.UseBasicAuthMiddleware(service, NewBasicAuthMiddleware())
 
 	user := os.Getenv("MYSQL_USER")
 	if user == "" {
@@ -44,6 +79,10 @@ func main() {
 	}
 
 	wsConns := controllers.NewConnections(service.Context)
+	// Mount "account" controller
+	c3 := controllers.NewAccountController(service, db)
+	app.MountAccountController(service, c3)
+
 	// Mount "message" controller
 	c := controllers.NewMessageController(service, db, wsConns)
 	app.MountMessageController(service, c)

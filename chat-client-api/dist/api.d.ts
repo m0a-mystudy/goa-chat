@@ -11,6 +11,25 @@ export declare class BaseAPI {
     constructor(fetch?: FetchAPI, basePath?: string);
 }
 /**
+ * A account (default view)
+ */
+export interface Account {
+    /**
+     * Date of creation
+     */
+    "created": Date;
+    /**
+     * ID of room
+     */
+    "id": string;
+    "password": string;
+}
+/**
+ * AccountCollection is the media type for an array of Account (default view)
+ */
+export interface AccountCollection extends Array<Account> {
+}
+/**
  * Error response media type (default view)
  */
 export interface Error {
@@ -97,6 +116,68 @@ export interface RoomPayload {
      */
     "name": string;
 }
+/**
+ * AccountApi - fetch parameter creator
+ */
+export declare const AccountApiFetchParamCreator: {
+    accountList(options?: any): FetchArgs;
+    accountPost(params: {
+        "payload": MessagePayload;
+    }, options?: any): FetchArgs;
+    accountShow(params: {
+        "user": string;
+    }, options?: any): FetchArgs;
+};
+/**
+ * AccountApi - functional programming interface
+ */
+export declare const AccountApiFp: {
+    accountList(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AccountCollection>;
+    accountPost(params: {
+        "payload": MessagePayload;
+    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any>;
+    accountShow(params: {
+        "user": string;
+    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Account>;
+};
+/**
+ * AccountApi - object-oriented interface
+ */
+export declare class AccountApi extends BaseAPI {
+    /**
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList(options?: any): Promise<AccountCollection>;
+    /**
+     * post account
+     * Create new account
+     * @param payload
+     */
+    accountPost(params: {
+        "payload": MessagePayload;
+    }, options?: any): Promise<any>;
+    /**
+     * show account
+     * Retrieve account with given id or something
+     * @param user
+     */
+    accountShow(params: {
+        "user": string;
+    }, options?: any): Promise<Account>;
+}
+/**
+ * AccountApi - factory interface
+ */
+export declare const AccountApiFactory: (fetch?: FetchAPI, basePath?: string) => {
+    accountList(options?: any): Promise<AccountCollection>;
+    accountPost(params: {
+        "payload": MessagePayload;
+    }, options?: any): Promise<any>;
+    accountShow(params: {
+        "user": string;
+    }, options?: any): Promise<Account>;
+};
 /**
  * MessageApi - fetch parameter creator
  */

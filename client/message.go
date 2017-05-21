@@ -90,6 +90,9 @@ func (c *Client) NewPostMessageRequest(ctx context.Context, path string, payload
 	} else {
 		header.Set("Content-Type", contentType)
 	}
+	if c.BasicAuthSigner != nil {
+		c.BasicAuthSigner.Sign(req)
+	}
 	return req, nil
 }
 

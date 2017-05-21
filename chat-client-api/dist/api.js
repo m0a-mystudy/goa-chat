@@ -31,6 +31,209 @@ var BaseAPI = (function () {
 exports.BaseAPI = BaseAPI;
 ;
 /**
+ * AccountApi - fetch parameter creator
+ */
+exports.AccountApiFetchParamCreator = {
+    /**
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList: function (options) {
+        var baseUrl = "/accounts";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     * post account
+     * Create new account
+     * @param payload
+     */
+    accountPost: function (params, options) {
+        // verify required parameter "payload" is set
+        if (params["payload"] == null) {
+            throw new Error("Missing required parameter payload when calling accountPost");
+        }
+        var baseUrl = "/accounts";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "POST" }, options);
+        var contentTypeHeader = {};
+        contentTypeHeader = { "Content-Type": "application/json" };
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
+        if (params["payload"]) {
+            fetchOptions.body = JSON.stringify(params["payload"] || {});
+        }
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     * show account
+     * Retrieve account with given id or something
+     * @param user
+     */
+    accountShow: function (params, options) {
+        // verify required parameter "user" is set
+        if (params["user"] == null) {
+            throw new Error("Missing required parameter user when calling accountShow");
+        }
+        var baseUrl = "/accounts/{user}"
+            .replace("{" + "user" + "}", "" + params["user"]);
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+};
+/**
+ * AccountApi - functional programming interface
+ */
+exports.AccountApiFp = {
+    /**
+     * list account
+     * Retrieve all accunts.
+     */
+    accountList: function (options) {
+        var fetchArgs = exports.AccountApiFetchParamCreator.accountList(options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     * post account
+     * Create new account
+     * @param payload
+     */
+    accountPost: function (params, options) {
+        var fetchArgs = exports.AccountApiFetchParamCreator.accountPost(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response;
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     * show account
+     * Retrieve account with given id or something
+     * @param user
+     */
+    accountShow: function (params, options) {
+        var fetchArgs = exports.AccountApiFetchParamCreator.accountShow(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+};
+/**
+ * AccountApi - object-oriented interface
+ */
+var AccountApi = (function (_super) {
+    __extends(AccountApi, _super);
+    function AccountApi() {
+        _super.apply(this, arguments);
+    }
+    /**
+     * list account
+     * Retrieve all accunts.
+     */
+    AccountApi.prototype.accountList = function (options) {
+        return exports.AccountApiFp.accountList(options)(this.fetch, this.basePath);
+    };
+    /**
+     * post account
+     * Create new account
+     * @param payload
+     */
+    AccountApi.prototype.accountPost = function (params, options) {
+        return exports.AccountApiFp.accountPost(params, options)(this.fetch, this.basePath);
+    };
+    /**
+     * show account
+     * Retrieve account with given id or something
+     * @param user
+     */
+    AccountApi.prototype.accountShow = function (params, options) {
+        return exports.AccountApiFp.accountShow(params, options)(this.fetch, this.basePath);
+    };
+    return AccountApi;
+}(BaseAPI));
+exports.AccountApi = AccountApi;
+;
+/**
+ * AccountApi - factory interface
+ */
+exports.AccountApiFactory = function (fetch, basePath) {
+    return {
+        /**
+         * list account
+         * Retrieve all accunts.
+         */
+        accountList: function (options) {
+            return exports.AccountApiFp.accountList(options)(fetch, basePath);
+        },
+        /**
+         * post account
+         * Create new account
+         * @param payload
+         */
+        accountPost: function (params, options) {
+            return exports.AccountApiFp.accountPost(params, options)(fetch, basePath);
+        },
+        /**
+         * show account
+         * Retrieve account with given id or something
+         * @param user
+         */
+        accountShow: function (params, options) {
+            return exports.AccountApiFp.accountShow(params, options)(fetch, basePath);
+        },
+    };
+};
+/**
  * MessageApi - fetch parameter creator
  */
 exports.MessageApiFetchParamCreator = {
@@ -78,6 +281,9 @@ exports.MessageApiFetchParamCreator = {
         var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
         contentTypeHeader = { "Content-Type": "application/json" };
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
         if (params["payload"]) {
             fetchOptions.body = JSON.stringify(params["payload"] || {});
         }
@@ -293,6 +499,9 @@ exports.RoomApiFetchParamCreator = {
         var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
         contentTypeHeader = { "Content-Type": "application/json" };
+        if (options.headers) {
+            contentTypeHeader = assign(contentTypeHeader, options.headers);
+        }
         if (params["payload"]) {
             fetchOptions.body = JSON.stringify(params["payload"] || {});
         }

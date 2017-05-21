@@ -39,7 +39,7 @@ export default class Chat
         const accountID = 10;
         const body = this.state.text;
         const roomID = this.props.match.params.roomID;
-        const options = {
+        const options: {} = {
             mode: 'cors',
             // credentials: 'include',
             headers: {
@@ -54,7 +54,9 @@ export default class Chat
         await this.messageAPI.messagePost({
             roomID,
             payload
-        }, options);
+        }, 
+                                          options 
+        );
         await this.fetchMessages();
         this.setState({ text: '' });
 

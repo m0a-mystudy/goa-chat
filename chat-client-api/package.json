@@ -1,7 +1,7 @@
 {
-  "name": "chat-client-api",
-  "version": "0.0.1",
-  "license": "MIT",
+  "name": "typescript-fetch-api",
+  "version": "0.0.0",
+  "license": "Unlicense",
   "main": "./dist/api.js",
   "browser": "./dist/api.js",
   "typings": "./dist/api.d.ts",
@@ -9,8 +9,8 @@
     "core-js": "^2.4.0",
     "isomorphic-fetch": "^2.2.1"
   },
-  "scripts": {
-    "prepublish": "typings install && tsc",
+  "scripts" : {
+    "prepublish" : "typings install && tsc", 
     "test": "tslint api.ts"
   },
   "devDependencies": {

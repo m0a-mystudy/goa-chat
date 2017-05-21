@@ -16,6 +16,46 @@ import (
 	"unicode/utf8"
 )
 
+// A account (default view)
+//
+// Identifier: application/vnd.account+json; view=default
+type Account struct {
+	// Date of creation
+	Created time.Time `form:"created" json:"created" xml:"created"`
+	// ID of room
+	ID       string `form:"id" json:"id" xml:"id"`
+	Password string `form:"password" json:"password" xml:"password"`
+}
+
+// Validate validates the Account media type instance.
+func (mt *Account) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.Password == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "password"))
+	}
+
+	return
+}
+
+// AccountCollection is the media type for an array of Account (default view)
+//
+// Identifier: application/vnd.account+json; type=collection; view=default
+type AccountCollection []*Account
+
+// Validate validates the AccountCollection media type instance.
+func (mt AccountCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
 // A Message (default view)
 //
 // Identifier: application/vnd.message+json; view=default
