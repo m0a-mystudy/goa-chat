@@ -386,3 +386,58 @@ func unmarshalPostRoomPayload(ctx context.Context, service *goa.Service, req *ht
 	goa.ContextRequest(ctx).Payload = payload.Publicize()
 	return nil
 }
+
+// ServeController is the controller interface for the Serve actions.
+type ServeController interface {
+	goa.Muxer
+	goa.FileServer
+}
+
+// MountServeController "mounts" a Serve resource controller on the given service.
+func MountServeController(service *goa.Service, ctrl ServeController) {
+	initService(service)
+	var h goa.Handler
+	service.Mux.Handle("OPTIONS", "/", ctrl.MuxHandler("preflight", handleServeOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/static/*filepath", ctrl.MuxHandler("preflight", handleServeOrigin(cors.HandlePreflight()), nil))
+
+	h = ctrl.FileHandler("/", "./goa-chat-client/build/index.html")
+	h = handleServeOrigin(h)
+	service.Mux.Handle("GET", "/", ctrl.MuxHandler("serve", h, nil))
+	service.LogInfo("mount", "ctrl", "Serve", "files", "./goa-chat-client/build/index.html", "route", "GET /")
+
+	h = ctrl.FileHandler("/static/*filepath", "./goa-chat-client/build/static")
+	h = handleServeOrigin(h)
+	service.Mux.Handle("GET", "/static/*filepath", ctrl.MuxHandler("serve", h, nil))
+	service.LogInfo("mount", "ctrl", "Serve", "files", "./goa-chat-client/build/static", "route", "GET /static/*filepath")
+
+	h = ctrl.FileHandler("/static/", "goa-chat-client/build/static/index.html")
+	h = handleServeOrigin(h)
+	service.Mux.Handle("GET", "/static/", ctrl.MuxHandler("serve", h, nil))
+	service.LogInfo("mount", "ctrl", "Serve", "files", "goa-chat-client/build/static/index.html", "route", "GET /static/")
+}
+
+// handleServeOrigin applies the CORS response headers corresponding to the origin.
+func handleServeOrigin(h goa.Handler) goa.Handler {
+
+	return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			// Not a CORS request
+			return h(ctx, rw, req)
+		}
+		if cors.MatchOrigin(origin, "http://localhost:3000") {
+			ctx = goa.WithLogContext(ctx, "origin", origin)
+			rw.Header().Set("Access-Control-Allow-Origin", origin)
+			rw.Header().Set("Vary", "Origin")
+			rw.Header().Set("Access-Control-Allow-Credentials", "false")
+			if acrm := req.Header.Get("Access-Control-Request-Method"); acrm != "" {
+				// We are handling a preflight request
+				rw.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+				rw.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Csrftoken, Authorization")
+			}
+			return h(ctx, rw, req)
+		}
+
+		return h(ctx, rw, req)
+	}
+}

@@ -90,6 +90,10 @@ func main() {
 	c2 := controllers.NewRoomController(service, db, wsConns)
 	app.MountRoomController(service, c2)
 
+	// Mount "serve" controller
+	c4 := controllers.NewServeController(service)
+	app.MountServeController(service, c4)
+
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {
 		service.LogError("startup", "err", err)

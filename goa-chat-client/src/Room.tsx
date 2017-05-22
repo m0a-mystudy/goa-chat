@@ -47,7 +47,10 @@ export default class Room extends React.Component<RoomProps, RoomState> {
     }
 
     async fetchRooms() {
-        const rooms = await this.roomAPI.roomList({});
+        const rooms = await this.roomAPI.roomList({
+            limit: 100,
+            offset: 0
+        });
         this.setState({
             rooms
         });
@@ -64,7 +67,7 @@ export default class Room extends React.Component<RoomProps, RoomState> {
             mode: 'cors',
             // credentials: 'include', 
             headers: {
-                'Authorization' : 'Basic ' + base64.encode("abe" + ":" + "pass"),
+                'Authorization': 'Basic ' + base64.encode("abe" + ":" + "pass"),
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.room+json'
             }

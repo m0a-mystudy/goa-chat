@@ -1,4 +1,3 @@
-basePath: /api
 consumes:
 - application/json
 - application/xml
@@ -232,7 +231,18 @@ info:
   title: goa study chat
   version: ""
 paths:
-  /accounts:
+  /:
+    get:
+      operationId: serve#/
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      summary: Download ./goa-chat-client/build/index.html
+  /api/accounts:
     get:
       description: Retrieve all accunts.
       operationId: account#list
@@ -274,7 +284,7 @@ paths:
       summary: post account
       tags:
       - account
-  /accounts/{user}:
+  /api/accounts/{user}:
     get:
       description: Retrieve account with given id or something
       operationId: account#show
@@ -302,7 +312,7 @@ paths:
       summary: show account
       tags:
       - account
-  /rooms:
+  /api/rooms:
     get:
       description: Retrieve all rooms.
       operationId: room#list
@@ -355,7 +365,7 @@ paths:
       summary: post room
       tags:
       - room
-  /rooms/{roomID}:
+  /api/rooms/{roomID}:
     get:
       description: Retrieve room with given id
       operationId: room#show
@@ -365,8 +375,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.room+json
       - application/vnd.goa.error
+      - application/vnd.room+json
       responses:
         "200":
           description: OK
@@ -383,7 +393,7 @@ paths:
       summary: show room
       tags:
       - room
-  /rooms/{roomID}/messages:
+  /api/rooms/{roomID}/messages:
     get:
       description: Retrieve all messages.
       operationId: message#list
@@ -444,7 +454,7 @@ paths:
       summary: post message
       tags:
       - message
-  /rooms/{roomID}/messages/{messageID}:
+  /api/rooms/{roomID}/messages/{messageID}:
     get:
       description: Retrieve message with given id
       operationId: message#show
@@ -458,8 +468,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.goa.error
       - application/vnd.message+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -476,7 +486,7 @@ paths:
       summary: show message
       tags:
       - message
-  /rooms/{roomID}/watch:
+  /api/rooms/{roomID}/watch:
     get:
       description: Retrieve room with given id
       operationId: room#watch
@@ -499,6 +509,27 @@ paths:
       summary: watch room
       tags:
       - room
+  /static/{filepath}:
+    get:
+      operationId: serve#/static/*filepath
+      parameters:
+      - description: Relative file path
+        in: path
+        name: filepath
+        required: true
+        type: string
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: Download ./goa-chat-client/build/static
 produces:
 - application/json
 - application/xml

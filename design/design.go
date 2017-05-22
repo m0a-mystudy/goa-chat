@@ -31,6 +31,11 @@ var _ = API("Chat API", func() {
 	})
 })
 
+var _ = Resource("serve", func() {
+	Files("/", "./goa-chat-client/build/index.html")
+	Files("/static/*filepath", "./goa-chat-client/build/static")
+})
+
 var _ = Resource("room", func() {
 	DefaultMedia(Room)
 	BasePath("/rooms")
