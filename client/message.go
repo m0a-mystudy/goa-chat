@@ -27,8 +27,8 @@ func ListMessagePath(roomID int) string {
 }
 
 // Retrieve all messages.
-func (c *Client) ListMessage(ctx context.Context, path string) (*http.Response, error) {
-	req, err := c.NewListMessageRequest(ctx, path)
+func (c *Client) ListMessage(ctx context.Context, path string, limit *int, offset *int) (*http.Response, error) {
+	req, err := c.NewListMessageRequest(ctx, path, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +36,22 @@ func (c *Client) ListMessage(ctx context.Context, path string) (*http.Response, 
 }
 
 // NewListMessageRequest create the request corresponding to the list action endpoint of the message resource.
-func (c *Client) NewListMessageRequest(ctx context.Context, path string) (*http.Request, error) {
+func (c *Client) NewListMessageRequest(ctx context.Context, path string, limit *int, offset *int) (*http.Request, error) {
 	scheme := c.Scheme
 	if scheme == "" {
 		scheme = "http"
 	}
 	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
+	values := u.Query()
+	if limit != nil {
+		tmp11 := strconv.Itoa(*limit)
+		values.Set("limit", tmp11)
+	}
+	if offset != nil {
+		tmp12 := strconv.Itoa(*offset)
+		values.Set("offset", tmp12)
+	}
+	u.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, err

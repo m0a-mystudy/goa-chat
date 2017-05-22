@@ -49,6 +49,8 @@ type (
 	// ListMessageCommand is the command line data structure for the list action of message
 	ListMessageCommand struct {
 		RoomID      int
+		Limit       int
+		Offset      int
 		PrettyPrint bool
 	}
 
@@ -69,6 +71,8 @@ type (
 
 	// ListRoomCommand is the command line data structure for the list action of room
 	ListRoomCommand struct {
+		Limit       int
+		Offset      int
 		PrettyPrint bool
 	}
 
@@ -481,7 +485,7 @@ func (cmd *ListMessageCommand) Run(c *client.Client, args []string) error {
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.ListMessage(ctx, path)
+	resp, err := c.ListMessage(ctx, path, intFlagVal("limit", cmd.Limit), intFlagVal("offset", cmd.Offset))
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -495,6 +499,10 @@ func (cmd *ListMessageCommand) Run(c *client.Client, args []string) error {
 func (cmd *ListMessageCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var roomID int
 	cc.Flags().IntVar(&cmd.RoomID, "roomID", roomID, ``)
+	var limit int
+	cc.Flags().IntVar(&cmd.Limit, "limit", limit, ``)
+	var offset int
+	cc.Flags().IntVar(&cmd.Offset, "offset", offset, ``)
 }
 
 // Run makes the HTTP request corresponding to the PostMessageCommand command.
@@ -570,7 +578,7 @@ func (cmd *ListRoomCommand) Run(c *client.Client, args []string) error {
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.ListRoom(ctx, path)
+	resp, err := c.ListRoom(ctx, path, intFlagVal("limit", cmd.Limit), intFlagVal("offset", cmd.Offset))
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -582,6 +590,10 @@ func (cmd *ListRoomCommand) Run(c *client.Client, args []string) error {
 
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ListRoomCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var limit int
+	cc.Flags().IntVar(&cmd.Limit, "limit", limit, ``)
+	var offset int
+	cc.Flags().IntVar(&cmd.Offset, "offset", offset, ``)
 }
 
 // Run makes the HTTP request corresponding to the PostRoomCommand command.

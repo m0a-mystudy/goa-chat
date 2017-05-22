@@ -306,6 +306,15 @@ paths:
     get:
       description: Retrieve all rooms.
       operationId: room#list
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        type: integer
+      - in: query
+        name: offset
+        required: false
+        type: integer
       produces:
       - application/vnd.room+json; type=collection
       responses:
@@ -356,8 +365,8 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.goa.error
       - application/vnd.room+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -379,6 +388,14 @@ paths:
       description: Retrieve all messages.
       operationId: message#list
       parameters:
+      - in: query
+        name: limit
+        required: false
+        type: integer
+      - in: query
+        name: offset
+        required: false
+        type: integer
       - in: path
         name: roomID
         required: true

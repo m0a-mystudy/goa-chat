@@ -37,6 +37,10 @@ var _ = Resource("room", func() {
 	Action("list", func() {
 		Routing(GET(""))
 		Description("Retrieve all rooms.")
+		Params(func() {
+			Param("limit", Integer)
+			Param("offset", Integer)
+		})
 		Response(OK, CollectionOf(Room))
 		Response(NotFound)
 	})
@@ -86,6 +90,11 @@ var _ = Resource("message", func() {
 	Action("list", func() {
 		Routing(GET(""))
 		Description("Retrieve all messages.")
+		Params(func() {
+			Param("limit", Integer)
+			Param("offset", Integer)
+		})
+
 		Response(OK, CollectionOf(Message))
 		Response(NotFound)
 	})

@@ -39,14 +39,19 @@ define(['axios'] , function (axios) {
 
   // Retrieve all messages.
   // path is the request path, the format is "/api/rooms/:roomID/messages"
+  // limit, offset are used to build the request query string.
   // config is an optional object to be merged into the config built by the function prior to making the request.
   // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
   // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
-  client.listMessage = function (path, config) {
+  client.listMessage = function (path, limit, offset, config) {
     cfg = {
       timeout: timeout,
       url: urlPrefix + path,
       method: 'get',
+      params: {
+        limit: limit,
+        offset: offset
+      },
       responseType: 'json'
     };
     if (config) {
@@ -57,14 +62,19 @@ define(['axios'] , function (axios) {
 
   // Retrieve all rooms.
   // path is the request path, the format is "/api/rooms"
+  // limit, offset are used to build the request query string.
   // config is an optional object to be merged into the config built by the function prior to making the request.
   // The content of the config object is described here: https://github.com/mzabriskie/axios#request-api
   // This function returns a promise which raises an error if the HTTP response is a 4xx or 5xx.
-  client.listRoom = function (path, config) {
+  client.listRoom = function (path, limit, offset, config) {
     cfg = {
       timeout: timeout,
       url: urlPrefix + path,
       method: 'get',
+      params: {
+        limit: limit,
+        offset: offset
+      },
       responseType: 'json'
     };
     if (config) {

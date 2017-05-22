@@ -22,13 +22,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 )
 
 // ListRoomNotFound runs the method List of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ListRoomNotFound(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController) http.ResponseWriter {
+func ListRoomNotFound(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController, limit *int, offset *int) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -48,14 +49,32 @@ func ListRoomNotFound(t goatest.TInterface, ctx context.Context, service *goa.Se
 
 	// Setup request context
 	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		query["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		query["offset"] = sliceVal
+	}
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/rooms"),
+		Path:     fmt.Sprintf("/api/rooms"),
+		RawQuery: query.Encode(),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		panic("invalid test " + err.Error()) // bug
 	}
 	prms := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		prms["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		prms["offset"] = sliceVal
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -84,7 +103,7 @@ func ListRoomNotFound(t goatest.TInterface, ctx context.Context, service *goa.Se
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ListRoomOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController) (http.ResponseWriter, app.RoomCollection) {
+func ListRoomOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.RoomController, limit *int, offset *int) (http.ResponseWriter, app.RoomCollection) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -104,14 +123,32 @@ func ListRoomOK(t goatest.TInterface, ctx context.Context, service *goa.Service,
 
 	// Setup request context
 	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		query["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		query["offset"] = sliceVal
+	}
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/rooms"),
+		Path:     fmt.Sprintf("/api/rooms"),
+		RawQuery: query.Encode(),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		panic("invalid test " + err.Error()) // bug
 	}
 	prms := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		prms["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		prms["offset"] = sliceVal
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}

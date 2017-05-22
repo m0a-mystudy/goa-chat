@@ -173,8 +173,7 @@ func MessagesByRoomID(db XODB, roomID int) ([]*Message, error) {
 	const sqlstr = `SELECT ` +
 		`id, room_id, account_id, body, postDate ` +
 		`FROM goa_chat.messages ` +
-		`WHERE room_id = ? ` +
-		`order by postDate desc limit 100`
+		`WHERE room_id = ?`
 
 	// run query
 	XOLog(sqlstr, roomID)

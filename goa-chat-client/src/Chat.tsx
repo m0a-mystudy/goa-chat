@@ -29,7 +29,11 @@ export default class Chat
 
     async fetchMessages() {
         const roomID = this.props.match.params.roomID;
-        const messages = await this.messageAPI.messageList({ roomID });
+        const messages = await this.messageAPI.messageList({ 
+            roomID,
+            limit: 100,
+            offset: 0
+        });
         this.setState({
             messages
         });

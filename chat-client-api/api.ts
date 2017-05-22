@@ -191,7 +191,6 @@ export const AccountApiFetchParamCreator = {
 
         let contentTypeHeader: Dictionary<string> = {};
         contentTypeHeader = { "Content-Type": "application/json" };
-        
         if (options.headers) {
             contentTypeHeader = assign(contentTypeHeader, options.headers);
         }
@@ -357,8 +356,10 @@ export const MessageApiFetchParamCreator = {
      * list message
      * Retrieve all messages.
      * @param roomID 
+     * @param limit 
+     * @param offset 
      */
-    messageList(params: {  "roomID": number; }, options?: any): FetchArgs {
+    messageList(params: {  "roomID": number; "limit"?: number; "offset"?: number; }, options?: any): FetchArgs {
         // verify required parameter "roomID" is set
         if (params["roomID"] == null) {
             throw new Error("Missing required parameter roomID when calling messageList");
@@ -366,6 +367,10 @@ export const MessageApiFetchParamCreator = {
         const baseUrl = `/rooms/{roomID}/messages`
             .replace(`{${"roomID"}}`, `${ params["roomID"] }`);
         let urlObj = url.parse(baseUrl, true);
+        urlObj.query = assign({}, urlObj.query, {
+            "limit": params["limit"],
+            "offset": params["offset"],
+        });
         let fetchOptions: RequestInit = assign({}, { method: "GET" }, options);
 
         let contentTypeHeader: Dictionary<string> = {};
@@ -453,8 +458,10 @@ export const MessageApiFp = {
      * list message
      * Retrieve all messages.
      * @param roomID 
+     * @param limit 
+     * @param offset 
      */
-    messageList(params: { "roomID": number;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<MessageCollection> {
+    messageList(params: { "roomID": number; "limit"?: number; "offset"?: number;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<MessageCollection> {
         const fetchArgs = MessageApiFetchParamCreator.messageList(params, options);
         return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
             return fetch(basePath + fetchArgs.url, fetchArgs.options).then((response) => {
@@ -512,8 +519,10 @@ export class MessageApi extends BaseAPI {
      * list message
      * Retrieve all messages.
      * @param roomID 
+     * @param limit 
+     * @param offset 
      */
-    messageList(params: {  "roomID": number; }, options?: any) {
+    messageList(params: {  "roomID": number; "limit"?: number; "offset"?: number; }, options?: any) {
         return MessageApiFp.messageList(params, options)(this.fetch, this.basePath);
     }
     /** 
@@ -545,8 +554,10 @@ export const MessageApiFactory = function (fetch?: FetchAPI, basePath?: string) 
          * list message
          * Retrieve all messages.
          * @param roomID 
+         * @param limit 
+         * @param offset 
          */
-        messageList(params: {  "roomID": number; }, options?: any) {
+        messageList(params: {  "roomID": number; "limit"?: number; "offset"?: number; }, options?: any) {
             return MessageApiFp.messageList(params, options)(fetch, basePath);
         },
         /** 
@@ -578,10 +589,16 @@ export const RoomApiFetchParamCreator = {
     /** 
      * list room
      * Retrieve all rooms.
+     * @param limit 
+     * @param offset 
      */
-    roomList(options?: any): FetchArgs {
+    roomList(params: {  "limit"?: number; "offset"?: number; }, options?: any): FetchArgs {
         const baseUrl = `/rooms`;
         let urlObj = url.parse(baseUrl, true);
+        urlObj.query = assign({}, urlObj.query, {
+            "limit": params["limit"],
+            "offset": params["offset"],
+        });
         let fetchOptions: RequestInit = assign({}, { method: "GET" }, options);
 
         let contentTypeHeader: Dictionary<string> = {};
@@ -609,7 +626,6 @@ export const RoomApiFetchParamCreator = {
 
         let contentTypeHeader: Dictionary<string> = {};
         contentTypeHeader = { "Content-Type": "application/json" };
-        
         if (options.headers) {
             contentTypeHeader = assign(contentTypeHeader, options.headers);
         }
@@ -681,9 +697,11 @@ export const RoomApiFp = {
     /** 
      * list room
      * Retrieve all rooms.
+     * @param limit 
+     * @param offset 
      */
-    roomList(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomCollection> {
-        const fetchArgs = RoomApiFetchParamCreator.roomList(options);
+    roomList(params: { "limit"?: number; "offset"?: number;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomCollection> {
+        const fetchArgs = RoomApiFetchParamCreator.roomList(params, options);
         return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
             return fetch(basePath + fetchArgs.url, fetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
@@ -754,9 +772,11 @@ export class RoomApi extends BaseAPI {
     /** 
      * list room
      * Retrieve all rooms.
+     * @param limit 
+     * @param offset 
      */
-    roomList(options?: any) {
-        return RoomApiFp.roomList(options)(this.fetch, this.basePath);
+    roomList(params: {  "limit"?: number; "offset"?: number; }, options?: any) {
+        return RoomApiFp.roomList(params, options)(this.fetch, this.basePath);
     }
     /** 
      * post room
@@ -792,9 +812,11 @@ export const RoomApiFactory = function (fetch?: FetchAPI, basePath?: string) {
         /** 
          * list room
          * Retrieve all rooms.
+         * @param limit 
+         * @param offset 
          */
-        roomList(options?: any) {
-            return RoomApiFp.roomList(options)(fetch, basePath);
+        roomList(params: {  "limit"?: number; "offset"?: number; }, options?: any) {
+            return RoomApiFp.roomList(params, options)(fetch, basePath);
         },
         /** 
          * post room

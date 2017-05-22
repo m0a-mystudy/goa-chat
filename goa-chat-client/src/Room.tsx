@@ -2,7 +2,7 @@ import * as React from 'react';
 import { RouteComponentProps, Link } from 'react-router-dom';
 import * as comm from 'chat-client-api';
 import { Card, CardActions, CardHeader, CardText, FlatButton } from 'material-ui';
-// import * as base64 from 'base-64';
+import * as base64 from 'base-64';
 
 
 const RoomCell = (props: { room: comm.Room }) => {
@@ -47,7 +47,7 @@ export default class Room extends React.Component<RoomProps, RoomState> {
     }
 
     async fetchRooms() {
-        const rooms = await this.roomAPI.roomList();
+        const rooms = await this.roomAPI.roomList({});
         this.setState({
             rooms
         });
@@ -64,9 +64,9 @@ export default class Room extends React.Component<RoomProps, RoomState> {
             mode: 'cors',
             // credentials: 'include', 
             headers: {
-                // 'Authorization' : 'Basic ' + base64.encode("abe" + ":" + "pass")
-                // 'Content-Type': 'application/json'
-                // 'Accept': 'application/vnd.room+json'
+                'Authorization' : 'Basic ' + base64.encode("abe" + ":" + "pass"),
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.room+json'
             }
         } as {};
         const payload = {

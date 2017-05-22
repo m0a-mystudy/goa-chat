@@ -39,7 +39,21 @@ func NewMessageController(service *goa.Service, db *sql.DB, wsc *WsConnections) 
 func (c *MessageController) List(ctx *app.ListMessageContext) error {
 	res := app.MessageCollection{}
 
-	messages, err := models.MessagesByRoomID(c.db, ctx.RoomID)
+	option := models.MessageParamOption{
+		RoomID:          ctx.RoomID,
+		Limit:           100,
+		Offset:          0,
+		OrderByPostDate: true,
+	}
+
+	if ctx.Limit != nil {
+		option.Limit = *ctx.Limit
+	}
+	if ctx.Offset != nil {
+		option.Offset = *ctx.Offset
+	}
+
+	messages, err := models.MessagesByOption(c.db, option)
 	if err != nil {
 		return err
 	}

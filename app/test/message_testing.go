@@ -22,13 +22,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 )
 
 // ListMessageNotFound runs the method List of the given controller with the given parameters.
 // It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int) http.ResponseWriter {
+func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int, limit *int, offset *int) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -48,8 +49,18 @@ func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa
 
 	// Setup request context
 	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		query["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		query["offset"] = sliceVal
+	}
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/rooms/%v/messages", roomID),
+		Path:     fmt.Sprintf("/api/rooms/%v/messages", roomID),
+		RawQuery: query.Encode(),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -57,6 +68,14 @@ func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa
 	}
 	prms := url.Values{}
 	prms["roomID"] = []string{fmt.Sprintf("%v", roomID)}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		prms["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		prms["offset"] = sliceVal
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -85,7 +104,7 @@ func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int) (http.ResponseWriter, app.MessageCollection) {
+func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int, limit *int, offset *int) (http.ResponseWriter, app.MessageCollection) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -105,8 +124,18 @@ func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 
 	// Setup request context
 	rw := httptest.NewRecorder()
+	query := url.Values{}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		query["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		query["offset"] = sliceVal
+	}
 	u := &url.URL{
-		Path: fmt.Sprintf("/api/rooms/%v/messages", roomID),
+		Path:     fmt.Sprintf("/api/rooms/%v/messages", roomID),
+		RawQuery: query.Encode(),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -114,6 +143,14 @@ func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 	}
 	prms := url.Values{}
 	prms["roomID"] = []string{fmt.Sprintf("%v", roomID)}
+	if limit != nil {
+		sliceVal := []string{strconv.Itoa(*limit)}
+		prms["limit"] = sliceVal
+	}
+	if offset != nil {
+		sliceVal := []string{strconv.Itoa(*offset)}
+		prms["offset"] = sliceVal
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}

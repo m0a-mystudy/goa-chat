@@ -241,6 +241,8 @@ exports.MessageApiFetchParamCreator = {
      * list message
      * Retrieve all messages.
      * @param roomID
+     * @param limit
+     * @param offset
      */
     messageList: function (params, options) {
         // verify required parameter "roomID" is set
@@ -250,6 +252,10 @@ exports.MessageApiFetchParamCreator = {
         var baseUrl = "/rooms/{roomID}/messages"
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
+        urlObj.query = assign({}, urlObj.query, {
+            "limit": params["limit"],
+            "offset": params["offset"],
+        });
         var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
@@ -333,6 +339,8 @@ exports.MessageApiFp = {
      * list message
      * Retrieve all messages.
      * @param roomID
+     * @param limit
+     * @param offset
      */
     messageList: function (params, options) {
         var fetchArgs = exports.MessageApiFetchParamCreator.messageList(params, options);
@@ -404,6 +412,8 @@ var MessageApi = (function (_super) {
      * list message
      * Retrieve all messages.
      * @param roomID
+     * @param limit
+     * @param offset
      */
     MessageApi.prototype.messageList = function (params, options) {
         return exports.MessageApiFp.messageList(params, options)(this.fetch, this.basePath);
@@ -439,6 +449,8 @@ exports.MessageApiFactory = function (fetch, basePath) {
          * list message
          * Retrieve all messages.
          * @param roomID
+         * @param limit
+         * @param offset
          */
         messageList: function (params, options) {
             return exports.MessageApiFp.messageList(params, options)(fetch, basePath);
@@ -470,10 +482,16 @@ exports.RoomApiFetchParamCreator = {
     /**
      * list room
      * Retrieve all rooms.
+     * @param limit
+     * @param offset
      */
-    roomList: function (options) {
+    roomList: function (params, options) {
         var baseUrl = "/rooms";
         var urlObj = url.parse(baseUrl, true);
+        urlObj.query = assign({}, urlObj.query, {
+            "limit": params["limit"],
+            "offset": params["offset"],
+        });
         var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
         if (contentTypeHeader) {
@@ -567,9 +585,11 @@ exports.RoomApiFp = {
     /**
      * list room
      * Retrieve all rooms.
+     * @param limit
+     * @param offset
      */
-    roomList: function (options) {
-        var fetchArgs = exports.RoomApiFetchParamCreator.roomList(options);
+    roomList: function (params, options) {
+        var fetchArgs = exports.RoomApiFetchParamCreator.roomList(params, options);
         return function (fetch, basePath) {
             if (fetch === void 0) { fetch = isomorphicFetch; }
             if (basePath === void 0) { basePath = BASE_PATH; }
@@ -655,9 +675,11 @@ var RoomApi = (function (_super) {
     /**
      * list room
      * Retrieve all rooms.
+     * @param limit
+     * @param offset
      */
-    RoomApi.prototype.roomList = function (options) {
-        return exports.RoomApiFp.roomList(options)(this.fetch, this.basePath);
+    RoomApi.prototype.roomList = function (params, options) {
+        return exports.RoomApiFp.roomList(params, options)(this.fetch, this.basePath);
     };
     /**
      * post room
@@ -695,9 +717,11 @@ exports.RoomApiFactory = function (fetch, basePath) {
         /**
          * list room
          * Retrieve all rooms.
+         * @param limit
+         * @param offset
          */
-        roomList: function (options) {
-            return exports.RoomApiFp.roomList(options)(fetch, basePath);
+        roomList: function (params, options) {
+            return exports.RoomApiFp.roomList(params, options)(fetch, basePath);
         },
         /**
          * post room

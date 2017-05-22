@@ -10,6 +10,8 @@
 # Meta targets:
 # - all is the default target, it runs all the targets in the order above.
 #
+DBNAME = goa_chat
+.PHONY: all start depend bootstrap generate models client build run
 
 all: depend clean generate build generate-client
 
@@ -40,6 +42,9 @@ generate-client:
 	@jq -s '.[0] * .[1]' chat-client-api/package.json chat-client-api/package_replace.json > replaced_package.json
 	@rm chat-client-api/package.json
 	@mv replaced_package.json chat-client-api/package.json
+
+models:
+	@xo mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(DBNAME)  -o models 
 
 build:
 	@go build -o chat

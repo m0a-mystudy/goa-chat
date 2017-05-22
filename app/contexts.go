@@ -131,6 +131,8 @@ type ListMessageContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
+	Limit  *int
+	Offset *int
 	RoomID int
 }
 
@@ -143,6 +145,28 @@ func NewListMessageContext(ctx context.Context, r *http.Request, service *goa.Se
 	req := goa.ContextRequest(ctx)
 	req.Request = r
 	rctx := ListMessageContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramLimit := req.Params["limit"]
+	if len(paramLimit) > 0 {
+		rawLimit := paramLimit[0]
+		if limit, err2 := strconv.Atoi(rawLimit); err2 == nil {
+			tmp2 := limit
+			tmp1 := &tmp2
+			rctx.Limit = tmp1
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("limit", rawLimit, "integer"))
+		}
+	}
+	paramOffset := req.Params["offset"]
+	if len(paramOffset) > 0 {
+		rawOffset := paramOffset[0]
+		if offset, err2 := strconv.Atoi(rawOffset); err2 == nil {
+			tmp4 := offset
+			tmp3 := &tmp4
+			rctx.Offset = tmp3
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("offset", rawOffset, "integer"))
+		}
+	}
 	paramRoomID := req.Params["roomID"]
 	if len(paramRoomID) > 0 {
 		rawRoomID := paramRoomID[0]
@@ -274,6 +298,8 @@ type ListRoomContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
+	Limit  *int
+	Offset *int
 }
 
 // NewListRoomContext parses the incoming request URL and body, performs validations and creates the
@@ -285,6 +311,28 @@ func NewListRoomContext(ctx context.Context, r *http.Request, service *goa.Servi
 	req := goa.ContextRequest(ctx)
 	req.Request = r
 	rctx := ListRoomContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramLimit := req.Params["limit"]
+	if len(paramLimit) > 0 {
+		rawLimit := paramLimit[0]
+		if limit, err2 := strconv.Atoi(rawLimit); err2 == nil {
+			tmp10 := limit
+			tmp9 := &tmp10
+			rctx.Limit = tmp9
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("limit", rawLimit, "integer"))
+		}
+	}
+	paramOffset := req.Params["offset"]
+	if len(paramOffset) > 0 {
+		rawOffset := paramOffset[0]
+		if offset, err2 := strconv.Atoi(rawOffset); err2 == nil {
+			tmp12 := offset
+			tmp11 := &tmp12
+			rctx.Offset = tmp11
+		} else {
+			err = goa.MergeErrors(err, goa.InvalidParamTypeError("offset", rawOffset, "integer"))
+		}
+	}
 	return &rctx, err
 }
 

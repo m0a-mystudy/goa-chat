@@ -184,6 +184,8 @@ export declare const AccountApiFactory: (fetch?: FetchAPI, basePath?: string) =>
 export declare const MessageApiFetchParamCreator: {
     messageList(params: {
         "roomID": number;
+        "limit"?: number;
+        "offset"?: number;
     }, options?: any): FetchArgs;
     messagePost(params: {
         "roomID": number;
@@ -200,6 +202,8 @@ export declare const MessageApiFetchParamCreator: {
 export declare const MessageApiFp: {
     messageList(params: {
         "roomID": number;
+        "limit"?: number;
+        "offset"?: number;
     }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<MessageCollection>;
     messagePost(params: {
         "roomID": number;
@@ -218,9 +222,13 @@ export declare class MessageApi extends BaseAPI {
      * list message
      * Retrieve all messages.
      * @param roomID
+     * @param limit
+     * @param offset
      */
     messageList(params: {
         "roomID": number;
+        "limit"?: number;
+        "offset"?: number;
     }, options?: any): Promise<MessageCollection>;
     /**
      * post message
@@ -249,6 +257,8 @@ export declare class MessageApi extends BaseAPI {
 export declare const MessageApiFactory: (fetch?: FetchAPI, basePath?: string) => {
     messageList(params: {
         "roomID": number;
+        "limit"?: number;
+        "offset"?: number;
     }, options?: any): Promise<MessageCollection>;
     messagePost(params: {
         "roomID": number;
@@ -263,7 +273,10 @@ export declare const MessageApiFactory: (fetch?: FetchAPI, basePath?: string) =>
  * RoomApi - fetch parameter creator
  */
 export declare const RoomApiFetchParamCreator: {
-    roomList(options?: any): FetchArgs;
+    roomList(params: {
+        "limit"?: number;
+        "offset"?: number;
+    }, options?: any): FetchArgs;
     roomPost(params: {
         "payload": RoomPayload;
     }, options?: any): FetchArgs;
@@ -278,7 +291,10 @@ export declare const RoomApiFetchParamCreator: {
  * RoomApi - functional programming interface
  */
 export declare const RoomApiFp: {
-    roomList(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomCollection>;
+    roomList(params: {
+        "limit"?: number;
+        "offset"?: number;
+    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<RoomCollection>;
     roomPost(params: {
         "payload": RoomPayload;
     }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any>;
@@ -296,8 +312,13 @@ export declare class RoomApi extends BaseAPI {
     /**
      * list room
      * Retrieve all rooms.
+     * @param limit
+     * @param offset
      */
-    roomList(options?: any): Promise<RoomCollection>;
+    roomList(params: {
+        "limit"?: number;
+        "offset"?: number;
+    }, options?: any): Promise<RoomCollection>;
     /**
      * post room
      * Create new Room
@@ -327,7 +348,10 @@ export declare class RoomApi extends BaseAPI {
  * RoomApi - factory interface
  */
 export declare const RoomApiFactory: (fetch?: FetchAPI, basePath?: string) => {
-    roomList(options?: any): Promise<RoomCollection>;
+    roomList(params: {
+        "limit"?: number;
+        "offset"?: number;
+    }, options?: any): Promise<RoomCollection>;
     roomPost(params: {
         "payload": RoomPayload;
     }, options?: any): Promise<any>;
