@@ -508,7 +508,7 @@ export const MessageApiFetchParamCreator = {
     },
     /** 
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID 
      * @param payload 
      */
@@ -599,7 +599,7 @@ export const MessageApiFp = {
     },
     /** 
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID 
      * @param payload 
      */
@@ -651,7 +651,7 @@ export class MessageApi extends BaseAPI {
     }
     /** 
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID 
      * @param payload 
      */
@@ -686,7 +686,7 @@ export const MessageApiFactory = function (fetch?: FetchAPI, basePath?: string) 
         },
         /** 
          * post message
-         * Create new message
+         * Create new message  Required security scopes:   * &#x60;api:access&#x60;
          * @param roomID 
          * @param payload 
          */
@@ -736,7 +736,7 @@ export const RoomApiFetchParamCreator = {
     },
     /** 
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload 
      */
     roomPost(params: {  "payload": RoomPayload; }, options?: any): FetchArgs {
@@ -838,7 +838,7 @@ export const RoomApiFp = {
     },
     /** 
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload 
      */
     roomPost(params: { "payload": RoomPayload;  }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any> {
@@ -904,7 +904,7 @@ export class RoomApi extends BaseAPI {
     }
     /** 
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload 
      */
     roomPost(params: {  "payload": RoomPayload; }, options?: any) {
@@ -944,7 +944,7 @@ export const RoomApiFactory = function (fetch?: FetchAPI, basePath?: string) {
         },
         /** 
          * post room
-         * Create new Room
+         * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
          * @param payload 
          */
         roomPost(params: {  "payload": RoomPayload; }, options?: any) {

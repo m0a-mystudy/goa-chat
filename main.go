@@ -6,7 +6,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/goadesign/goa"
@@ -94,8 +96,32 @@ func main() {
 	c4 := controllers.NewServeController(service)
 	app.MountServeController(service, c4)
 
+	// // Mount "auth" controller
+	// c5 := controllers.NewAuthController(service)
+	// app.MountAuthController(service, c5)
+
+	service.Mux.Handle("GET", "/login", func(w http.ResponseWriter, r *http.Request, _ url.Values) {
+		controllers.MakeAuthHandlerFunc("")(w, r)
+	})
+	service.Mux.Handle("GET", "/oauth2callback", func(w http.ResponseWriter, r *http.Request, _ url.Values) {
+		controllers.Oauth2callbackHandler(w, r)
+	})
+
+	service.Mux.Handle("GET", "/test", func(w http.ResponseWriter, r *http.Request, _ url.Values) {
+		// page := Page{"Hello World.", 1}
+		tmpl, err := template.ParseFiles("./html_template/save_token.html")
+		if err != nil {
+			panic(err)
+		}
+
+		err = tmpl.Execute(w, nil)
+		if err != nil {
+			panic(err)
+		}
+
+	})
 	// Start service
-	if err := service.ListenAndServe(":8080"); err != nil {
+	if err := service.ListenAndServe("oauth.local.com:8080"); err != nil {
 		service.LogError("startup", "err", err)
 	}
 }

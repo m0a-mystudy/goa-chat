@@ -2,7 +2,6 @@ import * as React from 'react';
 import { ListItem, Avatar } from 'material-ui';
 import * as comm from 'chat-client-api';
 
-
 export const ChatCell = (props: { message: comm.Message }) => (
     <ListItem style={
         {
@@ -14,4 +13,3 @@ export const ChatCell = (props: { message: comm.Message }) => (
         secondaryText={`date:${props.message.postDate}`}
     />
 );
-

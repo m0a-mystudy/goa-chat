@@ -56,6 +56,21 @@ func (mt AccountCollection) Validate() (err error) {
 	return
 }
 
+// a google login (default view)
+//
+// Identifier: application/vnd.login+json; view=default
+type Login struct {
+	URL string `form:"url" json:"url" xml:"url"`
+}
+
+// Validate validates the Login media type instance.
+func (mt *Login) Validate() (err error) {
+	if mt.URL == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "url"))
+	}
+	return
+}
+
 // A Message (default view)
 //
 // Identifier: application/vnd.message+json; view=default

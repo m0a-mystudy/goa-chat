@@ -65,7 +65,7 @@ func (c *RoomController) Post(ctx *app.PostRoomContext) error {
 	}
 	str := app.RoomHref(room.ID)
 	loginfo(ctx, "str,", str)
-	ctx.ResponseData.Header().Set("", app.RoomHref(room.ID))
+	ctx.ResponseData.Header().Set("Location", app.RoomHref(room.ID))
 	return ctx.Created()
 }
 

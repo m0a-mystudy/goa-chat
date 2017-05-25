@@ -179,6 +179,49 @@ export declare const AccountApiFactory: (fetch?: FetchAPI, basePath?: string) =>
     }, options?: any): Promise<Account>;
 };
 /**
+ * DefaultApi - fetch parameter creator
+ */
+export declare const DefaultApiFetchParamCreator: {
+    serve(options?: any): FetchArgs;
+    servestaticfilepath(params: {
+        "filepath": string;
+    }, options?: any): FetchArgs;
+};
+/**
+ * DefaultApi - functional programming interface
+ */
+export declare const DefaultApiFp: {
+    serve(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any>;
+    servestaticfilepath(params: {
+        "filepath": string;
+    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<any>;
+};
+/**
+ * DefaultApi - object-oriented interface
+ */
+export declare class DefaultApi extends BaseAPI {
+    /**
+     * Download ./goa-chat-client/build/index.html
+     */
+    serve(options?: any): Promise<any>;
+    /**
+     * Download ./goa-chat-client/build/static
+     * @param filepath Relative file path
+     */
+    servestaticfilepath(params: {
+        "filepath": string;
+    }, options?: any): Promise<any>;
+}
+/**
+ * DefaultApi - factory interface
+ */
+export declare const DefaultApiFactory: (fetch?: FetchAPI, basePath?: string) => {
+    serve(options?: any): Promise<any>;
+    servestaticfilepath(params: {
+        "filepath": string;
+    }, options?: any): Promise<any>;
+};
+/**
  * MessageApi - fetch parameter creator
  */
 export declare const MessageApiFetchParamCreator: {
@@ -232,7 +275,7 @@ export declare class MessageApi extends BaseAPI {
     }, options?: any): Promise<MessageCollection>;
     /**
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID
      * @param payload
      */
@@ -321,7 +364,7 @@ export declare class RoomApi extends BaseAPI {
     }, options?: any): Promise<RoomCollection>;
     /**
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload
      */
     roomPost(params: {

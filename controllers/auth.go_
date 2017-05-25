@@ -1,0 +1,174 @@
+package controllers
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+
+	oidc "github.com/coreos/go-oidc"
+	"github.com/goadesign/goa"
+	"github.com/m0a-mystudy/goa-chat/app"
+	uuid "github.com/satori/go.uuid"
+	"golang.org/x/oauth2"
+	v2 "google.golang.org/api/oauth2/v2"
+)
+
+var (
+// conf = oauth2.Config{
+// 	ClientID:     os.Getenv("OPENID_GOOGLE_CLIENT"),
+// 	ClientSecret: os.Getenv("OPENID_GOOGLE_SECRET"),
+// 	Scopes:       []string{"openid", "email", "profile"},
+// 	Endpoint: oauth2.Endpoint{
+// 		AuthURL:  "https://accounts.google.com/o/oauth2/v2/auth",
+// 		TokenURL: "https://www.googleapis.com/oauth2/v4/token",
+// 	},
+// }
+
+// fo test // TODO use session
+//state string
+)
+
+// AuthController implements the auth resource.
+type AuthController struct {
+	*goa.Controller
+}
+
+// NewAuthController creates a auth controller.
+func NewAuthController(service *goa.Service) *AuthController {
+	return &AuthController{Controller: service.NewController("AuthController")}
+}
+
+// func getRedirectURL(host string) string {
+// 	return fmt.Sprintf("https://%s/oauth2callback", host)
+// }
+// LoginURL runs the login action.
+func (c *AuthController) LoginURL(ctx *app.LoginURLAuthContext) error {
+	// AuthController_Login: start_implement
+	state = uuid.NewV4().String()
+	provider, _ := oidc.NewProvider(ctx, "https://accounts.google.com")
+	// 6/11 update:stateをredirect後と比較する場合はcookieに入れるのが無難です
+	sc := &http.Cookie{
+		Name:   "hogehoge",
+		Value:  state,
+		MaxAge: 60,
+		Path:   "/",
+	}
+
+	redierctURL := "http://oauth.local.com:8080"
+	if ctx.RedirectURL != nil {
+		redierctURL = *ctx.RedirectURL
+	}
+
+	oauth2Config := oauth2.Config{
+		ClientID:     os.Getenv("OPENID_GOOGLE_CLIENT"),
+		ClientSecret: os.Getenv("OPENID_GOOGLE_SECRET"),
+		RedirectURL:  redierctURL,
+
+		// Discovery returns the OAuth2 endpoints.
+		Endpoint: provider.Endpoint(),
+
+		// "openid" is a required scope for OpenID Connect flows.
+		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	// r := ctx.RequestData
+	// redierctURL := getRedirectURL(r.URL.Host)
+	url := oauth2Config.AuthCodeURL(state)
+	loginfo(ctx, "url", url)
+	// conf.RedirectURL = redierctURL
+	// url := conf.AuthCodeURL(state)
+
+	http.SetCookie(ctx.ResponseData, sc)
+	res := &app.Login{URL: url}
+	return ctx.OK(res)
+}
+
+//state=dea84c7e-556d-4c37-8bee-c713a1588c9f&code=4/ojkjVUopE3FQNt-jYfKmVaebiOyw4xVqf0FwaeAeDAI&authuser=0&session_state=37cf3fbe9b56832f0984a53c5ba578e4339ad3b9..b2b1&prompt=none#
+// Verify runs the verify action.
+func (c *AuthController) Verify(ctx *app.VerifyAuthContext) error {
+	// loginfo(ctx, ctx.RequestURI)
+	loginfo(ctx, "in Verify", "ctx.URL ", *ctx.URL)
+	// context := context.Background()
+	// 認証コードを取得します
+	// if ctx.URL == nil {
+	// 	// return ctx.NotFound()
+	// }
+
+	// url, err := url.Parse(*ctx.URL)
+	// if err != nil {
+	// 	return err
+	// }
+	redierctURL := "http://oauth.local.com:8080"
+	// if ctx.RedirectURL != nil {
+	// 	redierctURL = *ctx.RedirectURL
+	// }
+
+	provider, _ := oidc.NewProvider(ctx, "https://accounts.google.com")
+	conf := oauth2.Config{
+		ClientID:     os.Getenv("OPENID_GOOGLE_CLIENT"),
+		ClientSecret: os.Getenv("OPENID_GOOGLE_SECRET"),
+		RedirectURL:  redierctURL,
+		// Discovery returns the OAuth2 endpoints.
+		Endpoint: provider.Endpoint(),
+
+		// "openid" is a required scope for OpenID Connect flows.
+		Scopes: []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	// oauth2Config.
+	// fmt.Println(url.Query().Get("state"))
+	// fmt.Println(r.FormValue("state"))
+	// code := url.Query().Get("code")
+	// loginfo(ctx, "url.Query().Get(\"code\") ", "code", code)
+	code := ctx.RequestData.FormValue("code")
+	// appengineのcontextを取得します
+	// context := appengine.NewContext(r)
+
+	// 認証コードからtokenを取得します
+
+	tok, err := conf.Exchange(ctx, code)
+	if err != nil {
+		//http.Error(w, err.Error(), http.StatusUnauthorized)
+		return err
+	}
+
+	// tokenが正しいことを確認します
+	if tok.Valid() == false {
+		// http.Error(w, "token is invalid.", http.StatusUnauthorized)
+		return fmt.Errorf("tok.Valid false")
+	}
+
+	//tok.RefreshToken
+	loginfo(ctx, "tok.Valid() == true")
+
+	// oauth2 clinet serviceを取得します
+	// 特にuserの情報が必要ない場合はスルーです
+	service, err := v2.New(conf.Client(ctx, tok))
+	if err != nil {
+		// http.Error(w, err.Error(), http.StatusUnauthorized)
+		return err
+	}
+
+	// token情報を取得します
+	// ここにEmailやUser IDなどが入っています
+	// 特にuserの情報が必要ない場合はスルーです
+	tokenInfo, err := service.Tokeninfo().AccessToken(tok.AccessToken).Context(ctx).Do()
+	if err != nil {
+		// http.Error(w, err.Error(), http.StatusUnauthorized)
+		return err
+	}
+
+	userInfo, err := service.Userinfo.Get().Do()
+	if err != nil {
+		// http.Error(w, err.Error(), http.StatusUnauthorized)
+		return err
+	}
+
+	// fmt.Println(tokenInfo.UserId)
+	// fmt.Println(userInfo.Picture)
+	// fmt.Println(userInfo.Email)
+	loginfo(ctx, "tokenInfo.UserId", tokenInfo.UserId)
+	loginfo(ctx, "userInfo.Picture", userInfo.Picture)
+	loginfo(ctx, "userInfo.Email", userInfo.Email)
+	return ctx.NotFound()
+}

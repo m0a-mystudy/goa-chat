@@ -111,7 +111,7 @@ func handleAccountOrigin(h goa.Handler) goa.Handler {
 			// Not a CORS request
 			return h(ctx, rw, req)
 		}
-		if cors.MatchOrigin(origin, "http://localhost:3000") {
+		if cors.MatchOrigin(origin, "http://test.com:3000") {
 			ctx = goa.WithLogContext(ctx, "origin", origin)
 			rw.Header().Set("Access-Control-Allow-Origin", origin)
 			rw.Header().Set("Vary", "Origin")
@@ -193,10 +193,10 @@ func MountMessageController(service *goa.Service, ctrl MessageController) {
 		}
 		return ctrl.Post(rctx)
 	}
-	h = handleSecurity("basic_auth", h)
+	h = handleSecurity("jwt", h, "api:access")
 	h = handleMessageOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms/:roomID/messages", ctrl.MuxHandler("Post", h, unmarshalPostMessagePayload))
-	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages", "security", "basic_auth")
+	service.LogInfo("mount", "ctrl", "Message", "action", "Post", "route", "POST /api/rooms/:roomID/messages", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -224,7 +224,7 @@ func handleMessageOrigin(h goa.Handler) goa.Handler {
 			// Not a CORS request
 			return h(ctx, rw, req)
 		}
-		if cors.MatchOrigin(origin, "http://localhost:3000") {
+		if cors.MatchOrigin(origin, "http://test.com:3000") {
 			ctx = goa.WithLogContext(ctx, "origin", origin)
 			rw.Header().Set("Access-Control-Allow-Origin", origin)
 			rw.Header().Set("Vary", "Origin")
@@ -308,10 +308,10 @@ func MountRoomController(service *goa.Service, ctrl RoomController) {
 		}
 		return ctrl.Post(rctx)
 	}
-	h = handleSecurity("basic_auth", h)
+	h = handleSecurity("jwt", h, "api:access")
 	h = handleRoomOrigin(h)
 	service.Mux.Handle("POST", "/api/rooms", ctrl.MuxHandler("Post", h, unmarshalPostRoomPayload))
-	service.LogInfo("mount", "ctrl", "Room", "action", "Post", "route", "POST /api/rooms", "security", "basic_auth")
+	service.LogInfo("mount", "ctrl", "Room", "action", "Post", "route", "POST /api/rooms", "security", "jwt")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -355,7 +355,7 @@ func handleRoomOrigin(h goa.Handler) goa.Handler {
 			// Not a CORS request
 			return h(ctx, rw, req)
 		}
-		if cors.MatchOrigin(origin, "http://localhost:3000") {
+		if cors.MatchOrigin(origin, "http://test.com:3000") {
 			ctx = goa.WithLogContext(ctx, "origin", origin)
 			rw.Header().Set("Access-Control-Allow-Origin", origin)
 			rw.Header().Set("Vary", "Origin")
@@ -425,7 +425,7 @@ func handleServeOrigin(h goa.Handler) goa.Handler {
 			// Not a CORS request
 			return h(ctx, rw, req)
 		}
-		if cors.MatchOrigin(origin, "http://localhost:3000") {
+		if cors.MatchOrigin(origin, "http://test.com:3000") {
 			ctx = goa.WithLogContext(ctx, "origin", origin)
 			rw.Header().Set("Access-Control-Allow-Origin", origin)
 			rw.Header().Set("Vary", "Origin")

@@ -44,7 +44,7 @@ generate-client:
 	@mv replaced_package.json chat-client-api/package.json
 
 models:
-	@xo mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(DBNAME)  -o models 
+	@xo mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(DBNAME)  -o models -t ./xo_templates
 
 build:
 	@go build -o chat
@@ -52,8 +52,9 @@ build:
 build-client:
 	@cd chat-client-api && yarn
 	@cd chat-client-api && npm link
-	
 
+dev:
+	@on | xargs -n1 -I{} make build
 run:
 	@chat
 

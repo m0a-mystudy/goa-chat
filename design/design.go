@@ -8,13 +8,18 @@ import (
 // BasicAuth defines a security scheme using basic authentication.
 var BasicAuth = BasicAuthSecurity("basic_auth")
 
+var JWT = JWTSecurity("jwt", func() {
+	Header("Authorization")
+	Scope("api:access", "API access") // Define "api:access" scope
+})
+
 var _ = API("Chat API", func() {
 	Title("goa study chat") // Documentation title
 	Description("goa study chat api")
 	Host("localhost:8080")
 	Scheme("http")
 	BasePath("/api")
-	Origin("http://localhost:3000", func() {
+	Origin("http://test.com:3000", func() {
 		Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
 		Headers("Origin", "X-Requested-With", "Content-Type", "Accept",
 			"X-Csrftoken", "Authorization")
@@ -35,6 +40,41 @@ var _ = Resource("serve", func() {
 	Files("/", "./goa-chat-client/build/index.html")
 	Files("/static/*filepath", "./goa-chat-client/build/static")
 })
+
+// var _ = Resource("auth", func() {
+// 	BasePath("/auth")
+// 	Action("loginURL", func() {
+// 		Description("make google login url")
+// 		Routing(GET("login_url"))
+// 		Params(func() {
+// 			Param("redirect_url", String)
+// 		})
+
+// 		Response(OK, Login)
+// 		Response(NotFound)
+// 	})
+
+// 	//state=3c2a32b7-6409-49df-b5e5-c716ce5b1d10
+// 	//code=4/B5jdGhdYdct-dVsBSG3I0BXFao0LdxhfXj8WHvrJrjI&
+// 	//authuser=0
+// 	//session_state=aa073ed0ab585e6a2a28428258380db7182eb432..2e96&prompt=none#
+
+// 	Action("verify", func() {
+// 		Description("oauth callback veryfy")
+// 		Routing(GET("verify"))
+// 		Params(func() {
+// 			Param("redirect_uri", String)
+// 			Param("state", String)
+// 			Param("code", String)
+// 			Param("authuser", String)
+// 			Param("session_state", String)
+// 			Param("prompt", String)
+// 		})
+
+// 		Response(NotFound)
+// 	})
+
+// })
 
 var _ = Resource("room", func() {
 	DefaultMedia(Room)
@@ -67,7 +107,9 @@ var _ = Resource("room", func() {
 		Routing(POST(""))
 		Description("Create new Room")
 		Payload(RoomPayload)
-		Security(BasicAuth)
+		Security(JWT, func() {
+			Scope("api:access")
+		})
 
 		Response(Created, "/rooms/[0-9]+")
 		Response(BadRequest)
@@ -106,7 +148,9 @@ var _ = Resource("message", func() {
 	Action("post", func() {
 		Routing(POST(""))
 		Description("Create new message")
-		Security(BasicAuth)
+		Security(JWT, func() {
+			Scope("api:access")
+		})
 
 		Payload(MessagePayload)
 		Response(Created, "^/rooms/[0-9]+/messages/[0-9]+$")
@@ -239,5 +283,16 @@ var Account = MediaType("application/vnd.account+json", func() {
 		Attribute("id")
 		Attribute("password")
 		Attribute("created")
+	})
+})
+
+var Login = MediaType("application/vnd.login+json", func() {
+	Description("a google login")
+	Attributes(func() {
+		Attribute("url", String)
+		Required("url")
+	})
+	View("default", func() {
+		Attribute("url")
 	})
 })

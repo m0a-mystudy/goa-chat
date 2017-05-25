@@ -27,6 +27,9 @@ func main() {
 	// Mount "room" controller
 	c3 := NewRoomController(service)
 	app.MountRoomController(service, c3)
+	// Mount "serve" controller
+	c4 := NewServeController(service)
+	app.MountServeController(service, c4)
 
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {

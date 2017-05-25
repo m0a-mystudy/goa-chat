@@ -99,8 +99,8 @@ func (c *Client) NewPostRoomRequest(ctx context.Context, path string, payload *R
 	} else {
 		header.Set("Content-Type", contentType)
 	}
-	if c.BasicAuthSigner != nil {
-		c.BasicAuthSigner.Sign(req)
+	if c.JWTSigner != nil {
+		c.JWTSigner.Sign(req)
 	}
 	return req, nil
 }

@@ -153,7 +153,7 @@ Payload example:
 {
    "accountID": 1,
    "body": "this is chat message",
-   "postDate": "2008-11-20T01:54:58+09:00"
+   "postDate": "2011-12-01T23:40:08+09:00"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
@@ -171,7 +171,7 @@ Payload example:
 {
    "accountID": 1,
    "body": "this is chat message",
-   "postDate": "2008-11-20T01:54:58+09:00"
+   "postDate": "2011-12-01T23:40:08+09:00"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
@@ -187,9 +187,9 @@ Payload example:
 Payload example:
 
 {
-   "created": "1973-10-13T08:06:32+09:00",
+   "created": "2006-10-04T15:19:48+09:00",
    "description": "room description",
-   "id": 5859165714990803522,
+   "id": 2523899639915052973,
    "name": "room001"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },

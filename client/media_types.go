@@ -78,6 +78,28 @@ func (c *Client) DecodeErrorResponse(resp *http.Response) (*goa.ErrorResponse, e
 	return &decoded, err
 }
 
+// a google login (default view)
+//
+// Identifier: application/vnd.login+json; view=default
+type Login struct {
+	URL string `form:"url" json:"url" xml:"url"`
+}
+
+// Validate validates the Login media type instance.
+func (mt *Login) Validate() (err error) {
+	if mt.URL == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "url"))
+	}
+	return
+}
+
+// DecodeLogin decodes the Login instance encoded in resp body.
+func (c *Client) DecodeLogin(resp *http.Response) (*Login, error) {
+	var decoded Login
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return &decoded, err
+}
+
 // A Message (default view)
 //
 // Identifier: application/vnd.message+json; view=default

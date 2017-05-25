@@ -1,0 +1,65 @@
+import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import * as comm from 'chat-client-api';
+
+// import * as comm from 'chat-client-api';
+// import { Card, CardActions, CardHeader, CardText, FlatButton } from 'material-ui';
+// import * as base64 from 'base-64';
+
+// type RoomProps = RouteComponentProps<{ roomID: number }>;
+// interface RoomState {
+//     rooms: comm.RoomCollection;
+//     roomName: string;
+//     roomDescription: string;
+// }
+type CallbackProps = RouteComponentProps<{}>;
+//state=dea84c7e-556d-4c37-8bee-c713a1588c9f&code=4/ojkjVUopE3FQNt-jYfKmVaebiOyw4xVqf0FwaeAeDAI&authuser=0&session_state=37cf3fbe9b56832f0984a53c5ba578e4339ad3b9..b2b1&prompt=none#
+
+export default class Callback extends React.Component<CallbackProps, {}> {
+    // private roomAPI: comm.RoomApi;
+    async componentDidMount() {
+        console.log(location.href);
+        let url = new URL(location.href);
+        // let redirectUri = 'http://oauth.local.com:8080/oauth2callback'; //url.searchParams.get('redirect_uri');
+        let state = url.searchParams.get('state');
+        let code = url.searchParams.get('code');
+        let authuser = url.searchParams.get('authuser');
+        let sessionState = url.searchParams.get('session_state');
+        let prompt = url.searchParams.get('prompt');
+
+			// Param("state", String)
+			// Param("code", String)
+			// Param("authuser", String)
+			// Param("session_state", String)
+			// Param("prompt", String)
+        let option: {} = {
+            mode: 'cors'
+        };
+
+        if (redirectUri !== null &&
+            state !== null && 
+            sessionState !== null && 
+            prompt !== null &&
+            code !== null &&
+            authuser !== null) {
+           let result = await new comm.AuthApi(fetch, 'http://oauth.local.com:8080').authVerify({
+                redirectUri,
+                state,
+                sessionState,
+                prompt,
+                code,
+                authuser
+            },option);
+            console.log(result);
+        } else {
+            console.log('don run new comm.AuthApi().authVerify()');
+        }
+
+        
+        
+        
+    }
+    render() {
+        return <h1>Callback</h1>;
+    }
+};

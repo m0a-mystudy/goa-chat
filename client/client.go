@@ -19,6 +19,7 @@ import (
 type Client struct {
 	*goaclient.Client
 	BasicAuthSigner goaclient.Signer
+	JWTSigner       goaclient.Signer
 	Encoder         *goa.HTTPEncoder
 	Decoder         *goa.HTTPDecoder
 }
@@ -49,4 +50,9 @@ func New(c goaclient.Doer) *Client {
 // SetBasicAuthSigner sets the request signer for the basic_auth security scheme.
 func (c *Client) SetBasicAuthSigner(signer goaclient.Signer) {
 	c.BasicAuthSigner = signer
+}
+
+// SetJWTSigner sets the request signer for the jwt security scheme.
+func (c *Client) SetJWTSigner(signer goaclient.Signer) {
+	c.JWTSigner = signer
 }

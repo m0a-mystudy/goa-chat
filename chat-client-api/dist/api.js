@@ -18,7 +18,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var url = require("url");
 var isomorphicFetch = require("isomorphic-fetch");
 var assign = require("core-js/library/fn/object/assign");
-var BASE_PATH = "http://localhost:8080/api".replace(/\/+$/, "");
+var BASE_PATH = "http://localhost:8080".replace(/\/+$/, "");
 var BaseAPI = (function () {
     function BaseAPI(fetch, basePath) {
         if (fetch === void 0) { fetch = isomorphicFetch; }
@@ -39,7 +39,7 @@ exports.AccountApiFetchParamCreator = {
      * Retrieve all accunts.
      */
     accountList: function (options) {
-        var baseUrl = "/accounts";
+        var baseUrl = "/api/accounts";
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "GET" }, options);
         var contentTypeHeader = {};
@@ -61,7 +61,7 @@ exports.AccountApiFetchParamCreator = {
         if (params["payload"] == null) {
             throw new Error("Missing required parameter payload when calling accountPost");
         }
-        var baseUrl = "/accounts";
+        var baseUrl = "/api/accounts";
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
@@ -90,7 +90,7 @@ exports.AccountApiFetchParamCreator = {
         if (params["user"] == null) {
             throw new Error("Missing required parameter user when calling accountShow");
         }
-        var baseUrl = "/accounts/{user}"
+        var baseUrl = "/api/accounts/{user}"
             .replace("{" + "user" + "}", "" + params["user"]);
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "GET" }, options);
@@ -234,6 +234,136 @@ exports.AccountApiFactory = function (fetch, basePath) {
     };
 };
 /**
+ * DefaultApi - fetch parameter creator
+ */
+exports.DefaultApiFetchParamCreator = {
+    /**
+     * Download ./goa-chat-client/build/index.html
+     */
+    serve: function (options) {
+        var baseUrl = "/";
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+    /**
+     * Download ./goa-chat-client/build/static
+     * @param filepath Relative file path
+     */
+    servestaticfilepath: function (params, options) {
+        // verify required parameter "filepath" is set
+        if (params["filepath"] == null) {
+            throw new Error("Missing required parameter filepath when calling servestaticfilepath");
+        }
+        var baseUrl = "/static/{filepath}"
+            .replace("{" + "filepath" + "}", "" + params["filepath"]);
+        var urlObj = url.parse(baseUrl, true);
+        var fetchOptions = assign({}, { method: "GET" }, options);
+        var contentTypeHeader = {};
+        if (contentTypeHeader) {
+            fetchOptions.headers = contentTypeHeader;
+        }
+        return {
+            url: url.format(urlObj),
+            options: fetchOptions,
+        };
+    },
+};
+/**
+ * DefaultApi - functional programming interface
+ */
+exports.DefaultApiFp = {
+    /**
+     * Download ./goa-chat-client/build/index.html
+     */
+    serve: function (options) {
+        var fetchArgs = exports.DefaultApiFetchParamCreator.serve(options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+    /**
+     * Download ./goa-chat-client/build/static
+     * @param filepath Relative file path
+     */
+    servestaticfilepath: function (params, options) {
+        var fetchArgs = exports.DefaultApiFetchParamCreator.servestaticfilepath(params, options);
+        return function (fetch, basePath) {
+            if (fetch === void 0) { fetch = isomorphicFetch; }
+            if (basePath === void 0) { basePath = BASE_PATH; }
+            return fetch(basePath + fetchArgs.url, fetchArgs.options).then(function (response) {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                }
+                else {
+                    throw response;
+                }
+            });
+        };
+    },
+};
+/**
+ * DefaultApi - object-oriented interface
+ */
+var DefaultApi = (function (_super) {
+    __extends(DefaultApi, _super);
+    function DefaultApi() {
+        _super.apply(this, arguments);
+    }
+    /**
+     * Download ./goa-chat-client/build/index.html
+     */
+    DefaultApi.prototype.serve = function (options) {
+        return exports.DefaultApiFp.serve(options)(this.fetch, this.basePath);
+    };
+    /**
+     * Download ./goa-chat-client/build/static
+     * @param filepath Relative file path
+     */
+    DefaultApi.prototype.servestaticfilepath = function (params, options) {
+        return exports.DefaultApiFp.servestaticfilepath(params, options)(this.fetch, this.basePath);
+    };
+    return DefaultApi;
+}(BaseAPI));
+exports.DefaultApi = DefaultApi;
+;
+/**
+ * DefaultApi - factory interface
+ */
+exports.DefaultApiFactory = function (fetch, basePath) {
+    return {
+        /**
+         * Download ./goa-chat-client/build/index.html
+         */
+        serve: function (options) {
+            return exports.DefaultApiFp.serve(options)(fetch, basePath);
+        },
+        /**
+         * Download ./goa-chat-client/build/static
+         * @param filepath Relative file path
+         */
+        servestaticfilepath: function (params, options) {
+            return exports.DefaultApiFp.servestaticfilepath(params, options)(fetch, basePath);
+        },
+    };
+};
+/**
  * MessageApi - fetch parameter creator
  */
 exports.MessageApiFetchParamCreator = {
@@ -249,7 +379,7 @@ exports.MessageApiFetchParamCreator = {
         if (params["roomID"] == null) {
             throw new Error("Missing required parameter roomID when calling messageList");
         }
-        var baseUrl = "/rooms/{roomID}/messages"
+        var baseUrl = "/api/rooms/{roomID}/messages"
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
         urlObj.query = assign({}, urlObj.query, {
@@ -268,7 +398,7 @@ exports.MessageApiFetchParamCreator = {
     },
     /**
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID
      * @param payload
      */
@@ -281,7 +411,7 @@ exports.MessageApiFetchParamCreator = {
         if (params["payload"] == null) {
             throw new Error("Missing required parameter payload when calling messagePost");
         }
-        var baseUrl = "/rooms/{roomID}/messages"
+        var baseUrl = "/api/rooms/{roomID}/messages"
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "POST" }, options);
@@ -316,7 +446,7 @@ exports.MessageApiFetchParamCreator = {
         if (params["roomID"] == null) {
             throw new Error("Missing required parameter roomID when calling messageShow");
         }
-        var baseUrl = "/rooms/{roomID}/messages/{messageID}"
+        var baseUrl = "/api/rooms/{roomID}/messages/{messageID}"
             .replace("{" + "messageID" + "}", "" + params["messageID"])
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
@@ -359,7 +489,7 @@ exports.MessageApiFp = {
     },
     /**
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID
      * @param payload
      */
@@ -420,7 +550,7 @@ var MessageApi = (function (_super) {
     };
     /**
      * post message
-     * Create new message
+     * Create new message  Required security scopes:   * &#x60;api:access&#x60;
      * @param roomID
      * @param payload
      */
@@ -457,7 +587,7 @@ exports.MessageApiFactory = function (fetch, basePath) {
         },
         /**
          * post message
-         * Create new message
+         * Create new message  Required security scopes:   * &#x60;api:access&#x60;
          * @param roomID
          * @param payload
          */
@@ -486,7 +616,7 @@ exports.RoomApiFetchParamCreator = {
      * @param offset
      */
     roomList: function (params, options) {
-        var baseUrl = "/rooms";
+        var baseUrl = "/api/rooms";
         var urlObj = url.parse(baseUrl, true);
         urlObj.query = assign({}, urlObj.query, {
             "limit": params["limit"],
@@ -504,7 +634,7 @@ exports.RoomApiFetchParamCreator = {
     },
     /**
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload
      */
     roomPost: function (params, options) {
@@ -512,7 +642,7 @@ exports.RoomApiFetchParamCreator = {
         if (params["payload"] == null) {
             throw new Error("Missing required parameter payload when calling roomPost");
         }
-        var baseUrl = "/rooms";
+        var baseUrl = "/api/rooms";
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "POST" }, options);
         var contentTypeHeader = {};
@@ -541,7 +671,7 @@ exports.RoomApiFetchParamCreator = {
         if (params["roomID"] == null) {
             throw new Error("Missing required parameter roomID when calling roomShow");
         }
-        var baseUrl = "/rooms/{roomID}"
+        var baseUrl = "/api/rooms/{roomID}"
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "GET" }, options);
@@ -564,7 +694,7 @@ exports.RoomApiFetchParamCreator = {
         if (params["roomID"] == null) {
             throw new Error("Missing required parameter roomID when calling roomWatch");
         }
-        var baseUrl = "/rooms/{roomID}/watch"
+        var baseUrl = "/api/rooms/{roomID}/watch"
             .replace("{" + "roomID" + "}", "" + params["roomID"]);
         var urlObj = url.parse(baseUrl, true);
         var fetchOptions = assign({}, { method: "GET" }, options);
@@ -605,7 +735,7 @@ exports.RoomApiFp = {
     },
     /**
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload
      */
     roomPost: function (params, options) {
@@ -683,7 +813,7 @@ var RoomApi = (function (_super) {
     };
     /**
      * post room
-     * Create new Room
+     * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
      * @param payload
      */
     RoomApi.prototype.roomPost = function (params, options) {
@@ -725,7 +855,7 @@ exports.RoomApiFactory = function (fetch, basePath) {
         },
         /**
          * post room
-         * Create new Room
+         * Create new Room  Required security scopes:   * &#x60;api:access&#x60;
          * @param payload
          */
         roomPost: function (params, options) {

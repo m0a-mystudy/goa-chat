@@ -221,6 +221,8 @@ function addMiddleware(devServer) {
   devServer.use(devServer.middleware);
 }
 
+const proxyTarget = "http://localhost:8080";
+
 function runDevServer(host, port, protocol) {
   var devServer = new WebpackDevServer(compiler, {
     // Enable gzip compression of generated files.
@@ -228,6 +230,11 @@ function runDevServer(host, port, protocol) {
     // Silence WebpackDevServer's own logs since they're generally not useful.
     // It will still show compile warnings and errors with this setting.
     clientLogLevel: 'none',
+    proxy: {
+    "/api/*": proxyTarget,
+    "/login": proxyTarget,
+    "/oauth2callback": proxyTarget
+    },
     // By default WebpackDevServer serves physical files from current directory
     // in addition to all the virtual build products that it serves from memory.
     // This is confusing because those files won’t automatically be available in

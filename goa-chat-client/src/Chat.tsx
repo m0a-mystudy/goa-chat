@@ -4,8 +4,6 @@ import * as comm from 'chat-client-api';
 import { ChatCell } from './components/ChatCell';
 import { List, TextField, RaisedButton } from 'material-ui';
 
-
-
 type ChatProps = RouteComponentProps<{ roomID: number }>;
 interface ChatState {
     messages: comm.MessageCollection;
@@ -43,14 +41,14 @@ export default class Chat
         const accountID = 10;
         const body = this.state.text;
         const roomID = this.props.match.params.roomID;
-        const options: {} = {
-            mode: 'cors',
-            // credentials: 'include',
-            headers: {
-                'content-Type': 'application/json',
-                'accept': 'application/vnd.message+json'
-            }
-        } as {};
+        // const options: {} = {
+        //     mode: 'cors',
+        //     // credentials: 'include',
+        //     headers: {
+        //         'content-Type': 'application/json',
+        //         'accept': 'application/vnd.message+json'
+        //     }
+        // } as {};
         const payload = {
             accountID,
             body
@@ -58,8 +56,7 @@ export default class Chat
         await this.messageAPI.messagePost({
             roomID,
             payload
-        }, 
-                                          options 
+        }
         );
         await this.fetchMessages();
         this.setState({ text: '' });
