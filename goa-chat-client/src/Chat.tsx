@@ -49,7 +49,7 @@ export default class Chat
         await this.messageAPI.messagePost({
             roomID,
             payload
-        }, options);
+        },                                options);
         await this.fetchMessages();
         this.setState({ text: '' });
 

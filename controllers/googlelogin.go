@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/m0a-mystudy/goa-chat/models"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/oauth2"
@@ -27,12 +27,8 @@ var (
 		},
 	}
 
-	state = "testSampleCodeState"
+	mySigningKey = []byte("yasiayu2h8992js8")
 )
-
-func getRedirectURL(r *http.Request) string {
-	return fmt.Sprintf("http://%s/oauth2callback", r.Host)
-}
 
 // MakeAuthHandlerFunc return redirect
 func MakeAuthHandlerFunc(redirectPath string) func(w http.ResponseWriter, r *http.Request, option *ControllerOptions) {
@@ -41,8 +37,17 @@ func MakeAuthHandlerFunc(redirectPath string) func(w http.ResponseWriter, r *htt
 			redirectPath = "oauth2callback"
 		}
 		redierctURL := fmt.Sprintf("http://%s/%s", r.Host, redirectPath)
-		getRedirectURL(r)
 		conf.RedirectURL = redierctURL
+
+		claims := &jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Duration(30) * time.Second).Unix(),
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		state, err := token.SignedString(mySigningKey)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
 		url := conf.AuthCodeURL(state)
 		fmt.Println("url", url)
 		http.Redirect(w, r, url, 302)
@@ -51,17 +56,17 @@ func MakeAuthHandlerFunc(redirectPath string) func(w http.ResponseWriter, r *htt
 
 func Oauth2callbackHandler(w http.ResponseWriter, r *http.Request, option *ControllerOptions) {
 
-	if r.FormValue("state") != state {
+	state := r.FormValue("state")
+	t, err := jwt.Parse(state, func(*jwt.Token) (interface{}, error) {
+		return mySigningKey, nil
+	})
+	if !t.Valid {
 		http.Error(w, "state is invalid.", http.StatusUnauthorized)
 		return
 	}
 
-	fmt.Println(r.FormValue("state"))
-
 	// 認証コードを取得します
 	code := r.FormValue("code")
-	// appengineのcontextを取得します
-	// context := appengine.NewContext(r)
 	context := context.Background()
 	// 認証コードからtokenを取得します
 	tok, err := conf.Exchange(context, code)
@@ -69,17 +74,13 @@ func Oauth2callbackHandler(w http.ResponseWriter, r *http.Request, option *Contr
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-
 	// tokenが正しいことを確認します
 	if tok.Valid() == false {
 		http.Error(w, "token is invalid.", http.StatusUnauthorized)
 		return
 	}
 
-	//tok.RefreshToken
-
 	// oauth2 clinet serviceを取得します
-	// 特にuserの情報が必要ない場合はスルーです
 	service, err := v2.New(conf.Client(context, tok))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -88,7 +89,6 @@ func Oauth2callbackHandler(w http.ResponseWriter, r *http.Request, option *Contr
 
 	// token情報を取得します
 	// ここにEmailやUser IDなどが入っています
-	// 特にuserの情報が必要ない場合はスルーです
 	tokenInfo, err := service.Tokeninfo().AccessToken(tok.AccessToken).Context(context).Do()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -101,17 +101,18 @@ func Oauth2callbackHandler(w http.ResponseWriter, r *http.Request, option *Contr
 		return
 	}
 
-	//105212080826678848901
-	fmt.Println(tokenInfo.UserId)
-	fmt.Println(userInfo.Picture)
+	resp, err := http.Get(userInfo.Picture)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
-	resp, _ := http.Get(userInfo.Picture)
 	defer resp.Body.Close()
-	picture, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println(len(picture))
-
-	fmt.Println(userInfo.Name)
-	fmt.Println(userInfo.Email)
+	picture, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 
 	googleUserID := tokenInfo.UserId
 	account := &models.Account{}
@@ -131,29 +132,21 @@ func Oauth2callbackHandler(w http.ResponseWriter, r *http.Request, option *Contr
 		}
 	}
 
-	fmt.Printf("account = %v", account)
-
-	token := jwtgo.New(jwtgo.SigningMethodRS512)
+	token := jwt.New(jwt.SigningMethodRS512)
 	in10m := time.Now().Add(time.Duration(10) * time.Minute).Unix()
-	token.Claims = jwtgo.MapClaims{
-		"iss":      "Issuer",              // who creates the token and signs it
-		"aud":      "Audience",            // to whom the token is intended to be sent
-		"exp":      in10m,                 // time when the token will expire (10 minutes from now)
-		"jti":      uuid.NewV4().String(), // a unique identifier for the token
-		"iat":      time.Now().Unix(),     // when the token was issued/created (now)
-		"nbf":      2,                     // time before which the token is not yet valid (2 minutes ago)
-		"sub":      "subject",             // the subject/principal is whom the token is about
-		"scopes":   "api:access",          // token scope - not a standard claim
-		"googleID": googleUserID,
+	token.Claims = jwt.MapClaims{
+		"iss":    "m0a",                 // who creates the token and signs it
+		"exp":    in10m,                 // time when the token will expire (10 minutes from now)
+		"jti":    uuid.NewV4().String(), // a unique identifier for the token
+		"iat":    time.Now().Unix(),     // when the token was issued/created (now)
+		"sub":    googleUserID,          // the subject/principal is whom the token is about
+		"scopes": "api:access",          // token scope - not a standard claim
 	}
 	signedToken, err := token.SignedString(option.privateKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-
-	// Set auth header for client retrieval
-	resp.Header.Set("Authorization", "Bearer "+signedToken)
 
 	tmpl, err := template.ParseFiles("./html_template/save_token.html")
 	if err != nil {

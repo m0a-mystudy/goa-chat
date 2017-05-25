@@ -28,31 +28,6 @@ var (
 	ErrUnauthorized = goa.NewErrorClass("unauthorized", 401)
 )
 
-// NewBasicAuthMiddleware creates a middleware that checks for the presence of a basic auth header
-// and validates its content.
-func NewBasicAuthMiddleware() goa.Middleware {
-	return func(h goa.Handler) goa.Handler {
-		return func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-
-			goa.LogInfo(ctx, "header", fmt.Sprintf("<%s>", req.Header.Get("Authorization")))
-			// Retrieve and log basic auth info
-			user, pass, ok := req.BasicAuth()
-			// A real app would do something more interesting here
-			if !ok {
-				goa.LogInfo(ctx, "failed basic auth")
-				return ErrUnauthorized("missing auth")
-			}
-			if user != "abe" || pass != "pass" {
-				return ErrUnauthorized("invalid auth")
-			}
-
-			// Proceed
-			goa.LogInfo(ctx, "basic", "user", user, "pass", pass)
-			return h(ctx, rw, req)
-		}
-	}
-}
-
 func NewJWTMiddleware() goa.Middleware {
 	keys, err := LoadJWTPublicKeys()
 	if err != nil {

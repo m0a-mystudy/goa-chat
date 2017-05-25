@@ -95,13 +95,7 @@ func (c *MessageController) Post(ctx *app.PostMessageContext) error {
 	loginfo(ctx, "func (c *MessageController) Post(ctx *app.PostMessageContext) ",
 		"claims", claims)
 
-	// Use the claims to authorize
-	// if subject != "subject" {
-	// 	// A real app would probably use an "Unauthorized" response here
-	// 	// res := &app.Success{OK: false}
-	// 	// return ctx.OK(res)
-	// }
-	googleID, ok := claims["googleID"].(string)
+	googleID, ok := claims["sub"].(string)
 	if !ok {
 		return ctx.BadRequest()
 	}
