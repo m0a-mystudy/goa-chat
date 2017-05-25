@@ -104,7 +104,7 @@ func ListMessageNotFound(t goatest.TInterface, ctx context.Context, service *goa
 // It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int, limit *int, offset *int) (http.ResponseWriter, app.MessageCollection) {
+func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.MessageController, roomID int, limit *int, offset *int) (http.ResponseWriter, app.MessageWithAccountCollection) {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -170,16 +170,12 @@ func ListMessageOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt app.MessageCollection
+	var mt app.MessageWithAccountCollection
 	if resp != nil {
 		var ok bool
-		mt, ok = resp.(app.MessageCollection)
+		mt, ok = resp.(app.MessageWithAccountCollection)
 		if !ok {
-			t.Fatalf("invalid response media: got %+v, expected instance of app.MessageCollection", resp)
-		}
-		_err = mt.Validate()
-		if _err != nil {
-			t.Errorf("invalid response media type: %s", _err)
+			t.Fatalf("invalid response media: got %+v, expected instance of app.MessageWithAccountCollection", resp)
 		}
 	}
 

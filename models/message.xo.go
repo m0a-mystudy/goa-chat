@@ -10,11 +10,11 @@ import (
 
 // Message represents a row from 'goa_chat.messages'.
 type Message struct {
-	ID        int       `json:"id"`         // id
-	RoomID    int       `json:"room_id"`    // room_id
-	AccountID int       `json:"account_id"` // account_id
-	Body      string    `json:"body"`       // body
-	Postdate  time.Time `json:"postDate"`   // postDate
+	ID           int       `json:"id"`             // id
+	RoomID       int       `json:"room_id"`        // room_id
+	GoogleUserID string    `json:"google_user_id"` // google_user_id
+	Body         string    `json:"body"`           // body
+	Postdate     time.Time `json:"postDate"`       // postDate
 
 	// xo fields
 	_exists, _deleted bool
@@ -41,14 +41,14 @@ func (m *Message) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO goa_chat.messages (` +
-		`room_id, account_id, body, postDate` +
+		`room_id, google_user_id, body, postDate` +
 		`) VALUES (` +
 		`?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, m.RoomID, m.AccountID, m.Body, m.Postdate)
-	res, err := db.Exec(sqlstr, m.RoomID, m.AccountID, m.Body, m.Postdate)
+	XOLog(sqlstr, m.RoomID, m.GoogleUserID, m.Body, m.Postdate)
+	res, err := db.Exec(sqlstr, m.RoomID, m.GoogleUserID, m.Body, m.Postdate)
 	if err != nil {
 		return err
 	}
@@ -82,12 +82,12 @@ func (m *Message) Update(db XODB) error {
 
 	// sql query
 	const sqlstr = `UPDATE goa_chat.messages SET ` +
-		`room_id = ?, account_id = ?, body = ?, postDate = ?` +
+		`room_id = ?, google_user_id = ?, body = ?, postDate = ?` +
 		` WHERE id = ?`
 
 	// run query
-	XOLog(sqlstr, m.RoomID, m.AccountID, m.Body, m.Postdate, m.ID)
-	_, err = db.Exec(sqlstr, m.RoomID, m.AccountID, m.Body, m.Postdate, m.ID)
+	XOLog(sqlstr, m.RoomID, m.GoogleUserID, m.Body, m.Postdate, m.ID)
+	_, err = db.Exec(sqlstr, m.RoomID, m.GoogleUserID, m.Body, m.Postdate, m.ID)
 	return err
 }
 
@@ -145,7 +145,7 @@ func MessageByID(db XODB, id int) (*Message, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, room_id, account_id, body, postDate ` +
+		`id, room_id, google_user_id, body, postDate ` +
 		`FROM goa_chat.messages ` +
 		`WHERE id = ?`
 
@@ -155,7 +155,7 @@ func MessageByID(db XODB, id int) (*Message, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&m.ID, &m.RoomID, &m.AccountID, &m.Body, &m.Postdate)
+	err = db.QueryRow(sqlstr, id).Scan(&m.ID, &m.RoomID, &m.GoogleUserID, &m.Body, &m.Postdate)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func MessagesByRoomID(db XODB, roomID int) ([]*Message, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, room_id, account_id, body, postDate ` +
+		`id, room_id, google_user_id, body, postDate ` +
 		`FROM goa_chat.messages ` +
 		`WHERE room_id = ?`
 
@@ -191,7 +191,7 @@ func MessagesByRoomID(db XODB, roomID int) ([]*Message, error) {
 		}
 
 		// scan
-		err = q.Scan(&m.ID, &m.RoomID, &m.AccountID, &m.Body, &m.Postdate)
+		err = q.Scan(&m.ID, &m.RoomID, &m.GoogleUserID, &m.Body, &m.Postdate)
 		if err != nil {
 			return nil, err
 		}

@@ -58,19 +58,31 @@ export interface Error {
  * A Message (default view)
  */
 export interface Message {
-    "accountID": number;
     "body": string;
+    "googleUserID": string;
+    "postDate": Date;
+}
+export interface MessagePayload {
+    "body": string;
+    "googleUserID"?: string;
     "postDate": Date;
 }
 /**
- * MessageCollection is the media type for an array of Message (default view)
+ * A Message with account (default view)
  */
-export interface MessageCollection extends Array<Message> {
+export interface MessageWithAccount {
+    "body"?: string;
+    "email"?: string;
+    "googleUserID"?: string;
+    "id"?: number;
+    "image"?: string;
+    "name"?: string;
+    "postDate"?: Date;
 }
-export interface MessagePayload {
-    "accountID": number;
-    "body": string;
-    "postDate": Date;
+/**
+ * Message_with_accountCollection is the media type for an array of Message_with_account (default view)
+ */
+export interface MessageWithAccountCollection extends Array<MessageWithAccount> {
 }
 /**
  * A room (default view)
@@ -247,7 +259,7 @@ export declare const MessageApiFp: {
         "roomID": number;
         "limit"?: number;
         "offset"?: number;
-    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<MessageCollection>;
+    }, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<MessageWithAccountCollection>;
     messagePost(params: {
         "roomID": number;
         "payload": MessagePayload;
@@ -272,7 +284,7 @@ export declare class MessageApi extends BaseAPI {
         "roomID": number;
         "limit"?: number;
         "offset"?: number;
-    }, options?: any): Promise<MessageCollection>;
+    }, options?: any): Promise<MessageWithAccountCollection>;
     /**
      * post message
      * Create new message  Required security scopes:   * &#x60;api:access&#x60;
@@ -302,7 +314,7 @@ export declare const MessageApiFactory: (fetch?: FetchAPI, basePath?: string) =>
         "roomID": number;
         "limit"?: number;
         "offset"?: number;
-    }, options?: any): Promise<MessageCollection>;
+    }, options?: any): Promise<MessageWithAccountCollection>;
     messagePost(params: {
         "roomID": number;
         "payload": MessagePayload;

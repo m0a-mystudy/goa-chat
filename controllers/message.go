@@ -1,9 +1,14 @@
 package controllers
 
 import (
+	"encoding/base64"
+	"fmt"
 	"time"
 
+	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/goadesign/goa"
+	"github.com/goadesign/goa/middleware/security/jwt"
+
 	"github.com/m0a-mystudy/goa-chat/app"
 	"github.com/m0a-mystudy/goa-chat/models"
 )
@@ -11,9 +16,24 @@ import (
 // ToMessageMedia convert tool
 func ToMessageMedia(model *models.Message) *app.Message {
 	ret := app.Message{
-		Body:      model.Body,
-		AccountID: model.AccountID,
-		PostDate:  model.Postdate,
+		Body:         model.Body,
+		GoogleUserID: model.GoogleUserID,
+		PostDate:     model.Postdate,
+	}
+	return &ret
+}
+
+func ToMessageWithAccountMedia(model *models.MessagesWithAccount) *app.MessageWithAccount {
+
+	image := base64.StdEncoding.EncodeToString(model.Image)
+	ret := app.MessageWithAccount{
+		ID:           &model.ID,
+		Body:         &model.Body,
+		PostDate:     &model.Postdate,
+		Name:         &model.Name,
+		Email:        &model.Email,
+		GoogleUserID: &model.GoogleUserID,
+		Image:        &image,
 	}
 	return &ret
 }
@@ -34,7 +54,7 @@ func NewMessageController(service *goa.Service, option *ControllerOptions) *Mess
 
 // List runs the list action.
 func (c *MessageController) List(ctx *app.ListMessageContext) error {
-	res := app.MessageCollection{}
+	res := app.MessageWithAccountCollection{}
 
 	option := models.MessageParamOption{
 		RoomID:          ctx.RoomID,
@@ -50,12 +70,12 @@ func (c *MessageController) List(ctx *app.ListMessageContext) error {
 		option.Offset = *ctx.Offset
 	}
 
-	messages, err := models.MessagesByOption(c.option.db, option)
+	messages, err := models.MessagesWithAccountByOption(c.option.db, option)
 	if err != nil {
 		return err
 	}
 	for _, m := range messages {
-		res = append(res, ToMessageMedia(m))
+		res = append(res, ToMessageWithAccountMedia(m))
 	}
 	return ctx.OK(res)
 }
@@ -65,11 +85,33 @@ func (c *MessageController) Post(ctx *app.PostMessageContext) error {
 	db := c.option.db
 	connections := c.option.connections
 
+	token := jwt.ContextJWT(ctx)
+	if token == nil {
+		return fmt.Errorf("JWT token is missing from context") // internal error
+	}
+
+	claims := token.Claims.(jwtgo.MapClaims)
+
+	loginfo(ctx, "func (c *MessageController) Post(ctx *app.PostMessageContext) ",
+		"claims", claims)
+
+	// Use the claims to authorize
+	// if subject != "subject" {
+	// 	// A real app would probably use an "Unauthorized" response here
+	// 	// res := &app.Success{OK: false}
+	// 	// return ctx.OK(res)
+	// }
+	googleID, ok := claims["googleID"].(string)
+	if !ok {
+		return ctx.BadRequest()
+	}
+	loginfo(ctx, "googleID", googleID)
+
 	m := models.Message{
-		RoomID:    ctx.RoomID,
-		AccountID: ctx.Payload.AccountID,
-		Body:      ctx.Payload.Body,
-		Postdate:  time.Now(),
+		RoomID:       ctx.RoomID,
+		GoogleUserID: googleID,
+		Body:         ctx.Payload.Body,
+		Postdate:     time.Now(),
 	}
 
 	err := m.Insert(db)

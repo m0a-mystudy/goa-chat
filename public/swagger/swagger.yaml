@@ -43,18 +43,17 @@ definitions:
   Message:
     description: A Message (default view)
     example:
-      accountID: 1
       body: this is chat message
+      googleUserID: "12345678"
       postDate: 1973-10-13T08:06:32+09:00
     properties:
-      accountID:
-        example: 1
-        format: int64
-        type: integer
       body:
         example: this is chat message
         maxLength: 400
         minLength: 1
+        type: string
+      googleUserID:
+        example: "12345678"
         type: string
       postDate:
         default: 1978-06-30T10:00:00+09:00
@@ -62,50 +61,83 @@ definitions:
         format: date-time
         type: string
     required:
-    - accountID
+    - googleUserID
     - body
     - postDate
     title: 'Mediatype identifier: application/vnd.message+json; view=default'
     type: object
-  MessageCollection:
-    description: MessageCollection is the media type for an array of Message (default
-      view)
+  Message_with_account:
+    description: A Message with account (default view)
     example:
-    - accountID: 1
-      body: this is chat message
-      postDate: 1973-10-13T08:06:32+09:00
-    - accountID: 1
-      body: this is chat message
-      postDate: 1973-10-13T08:06:32+09:00
-    - accountID: 1
-      body: this is chat message
-      postDate: 1973-10-13T08:06:32+09:00
+      body: Odit error.
+      email: Eius qui.
+      googleUserID: Est voluptatibus saepe.
+      id: 4.812766e+18
+      image: Omnis et.
+      name: Nisi expedita.
+      postDate: 1982-07-23T01:49:31+09:00
+    properties:
+      body:
+        example: Odit error.
+        type: string
+      email:
+        example: Eius qui.
+        type: string
+      googleUserID:
+        example: Est voluptatibus saepe.
+        type: string
+      id:
+        example: 4.812766e+18
+        format: int64
+        type: integer
+      image:
+        example: Omnis et.
+        type: string
+      name:
+        example: Nisi expedita.
+        type: string
+      postDate:
+        example: 1982-07-23T01:49:31+09:00
+        format: date-time
+        type: string
+    title: 'Mediatype identifier: application/vnd.message_with_account+json; view=default'
+    type: object
+  Message_with_accountCollection:
+    description: Message_with_accountCollection is the media type for an array of
+      Message_with_account (default view)
+    example:
+    - body: Odit error.
+      email: Eius qui.
+      googleUserID: Est voluptatibus saepe.
+      id: 4.812766e+18
+      image: Omnis et.
+      name: Nisi expedita.
+      postDate: 1982-07-23T01:49:31+09:00
     items:
-      $ref: '#/definitions/Message'
-    title: 'Mediatype identifier: application/vnd.message+json; type=collection; view=default'
+      $ref: '#/definitions/Message_with_account'
+    title: 'Mediatype identifier: application/vnd.message_with_account+json; type=collection;
+      view=default'
     type: array
   MessagePayload:
     example:
-      accountID: 1
       body: this is chat message
-      postDate: 2011-12-01T23:40:08+09:00
+      googleUserID: "12345678"
+      postDate: 1978-09-18T20:35:11+09:00
     properties:
-      accountID:
-        example: 1
-        format: int64
-        type: integer
       body:
         example: this is chat message
         maxLength: 400
         minLength: 1
         type: string
+      googleUserID:
+        example: "12345678"
+        type: string
       postDate:
         default: 1978-06-30T10:00:00+09:00
-        example: 2011-12-01T23:40:08+09:00
+        example: 1978-09-18T20:35:11+09:00
         format: date-time
         type: string
     required:
-    - accountID
     - body
     - postDate
     title: MessagePayload
@@ -113,14 +145,14 @@ definitions:
   Room:
     description: A room (default view)
     example:
-      created: 1995-06-04T18:46:04+09:00
+      created: 2014-08-14T02:16:08+09:00
       description: room description
-      id: 7.6309603e+18
+      id: 2.4780884e+18
       name: room001
     properties:
       created:
         description: Date of creation
-        example: 1995-06-04T18:46:04+09:00
+        example: 2014-08-14T02:16:08+09:00
         format: date-time
         type: string
       description:
@@ -130,7 +162,7 @@ definitions:
         type: string
       id:
         description: ID of room
-        example: 7.6309603e+18
+        example: 2.4780884e+18
         format: int64
         type: integer
       name:
@@ -145,13 +177,17 @@ definitions:
   RoomCollection:
     description: RoomCollection is the media type for an array of Room (default view)
     example:
-    - created: 1995-06-04T18:46:04+09:00
+    - created: 2014-08-14T02:16:08+09:00
       description: room description
-      id: 7.6309603e+18
+      id: 2.4780884e+18
       name: room001
-    - created: 1995-06-04T18:46:04+09:00
+    - created: 2014-08-14T02:16:08+09:00
       description: room description
-      id: 7.6309603e+18
+      id: 2.4780884e+18
+      name: room001
+    - created: 2014-08-14T02:16:08+09:00
+      description: room description
+      id: 2.4780884e+18
       name: room001
     items:
       $ref: '#/definitions/Room'
@@ -159,14 +195,14 @@ definitions:
     type: array
   RoomPayload:
     example:
-      created: 2006-10-04T15:19:48+09:00
+      created: 1988-07-20T23:26:33+09:00
       description: room description
-      id: 2.5238995e+18
+      id: 6.0919464e+18
       name: room001
     properties:
       created:
         description: Date of creation
-        example: 2006-10-04T15:19:48+09:00
+        example: 1988-07-20T23:26:33+09:00
         format: date-time
         type: string
       description:
@@ -176,7 +212,7 @@ definitions:
         type: string
       id:
         description: ID of room
-        example: 2.5238995e+18
+        example: 6.0919464e+18
         format: int64
         type: integer
       name:
@@ -416,12 +452,12 @@ paths:
         required: true
         type: integer
       produces:
-      - application/vnd.message+json; type=collection
+      - application/vnd.message_with_account+json; type=collection
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/MessageCollection'
+            $ref: '#/definitions/Message_with_accountCollection'
         "404":
           description: Not Found
       schemes:

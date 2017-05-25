@@ -151,9 +151,9 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 Payload example:
 
 {
-   "accountID": 1,
    "body": "this is chat message",
-   "postDate": "2011-12-01T23:40:08+09:00"
+   "googleUserID": "12345678",
+   "postDate": "1978-09-18T20:35:11+09:00"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
@@ -169,9 +169,9 @@ Payload example:
 Payload example:
 
 {
-   "accountID": 1,
    "body": "this is chat message",
-   "postDate": "2011-12-01T23:40:08+09:00"
+   "googleUserID": "12345678",
+   "postDate": "1978-09-18T20:35:11+09:00"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
@@ -187,9 +187,9 @@ Payload example:
 Payload example:
 
 {
-   "created": "2006-10-04T15:19:48+09:00",
+   "created": "1988-07-20T23:26:33+09:00",
    "description": "room description",
-   "id": 2523899639915052973,
+   "id": 6091946217269568198,
    "name": "room001"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },

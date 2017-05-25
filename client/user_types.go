@@ -18,9 +18,9 @@ import (
 
 // messagePayload user type.
 type messagePayload struct {
-	AccountID *int       `form:"accountID,omitempty" json:"accountID,omitempty" xml:"accountID,omitempty"`
-	Body      *string    `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
-	PostDate  *time.Time `form:"postDate,omitempty" json:"postDate,omitempty" xml:"postDate,omitempty"`
+	Body         *string    `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+	GoogleUserID *string    `form:"googleUserID,omitempty" json:"googleUserID,omitempty" xml:"googleUserID,omitempty"`
+	PostDate     *time.Time `form:"postDate,omitempty" json:"postDate,omitempty" xml:"postDate,omitempty"`
 }
 
 // Finalize sets the default values for messagePayload type instance.
@@ -33,9 +33,6 @@ func (ut *messagePayload) Finalize() {
 
 // Validate validates the messagePayload type instance.
 func (ut *messagePayload) Validate() (err error) {
-	if ut.AccountID == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "accountID"))
-	}
 	if ut.Body == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "body"))
 	}
@@ -58,11 +55,11 @@ func (ut *messagePayload) Validate() (err error) {
 // Publicize creates MessagePayload from messagePayload
 func (ut *messagePayload) Publicize() *MessagePayload {
 	var pub MessagePayload
-	if ut.AccountID != nil {
-		pub.AccountID = *ut.AccountID
-	}
 	if ut.Body != nil {
 		pub.Body = *ut.Body
+	}
+	if ut.GoogleUserID != nil {
+		pub.GoogleUserID = ut.GoogleUserID
 	}
 	if ut.PostDate != nil {
 		pub.PostDate = *ut.PostDate
@@ -72,14 +69,13 @@ func (ut *messagePayload) Publicize() *MessagePayload {
 
 // MessagePayload user type.
 type MessagePayload struct {
-	AccountID int       `form:"accountID" json:"accountID" xml:"accountID"`
-	Body      string    `form:"body" json:"body" xml:"body"`
-	PostDate  time.Time `form:"postDate" json:"postDate" xml:"postDate"`
+	Body         string    `form:"body" json:"body" xml:"body"`
+	GoogleUserID *string   `form:"googleUserID,omitempty" json:"googleUserID,omitempty" xml:"googleUserID,omitempty"`
+	PostDate     time.Time `form:"postDate" json:"postDate" xml:"postDate"`
 }
 
 // Validate validates the MessagePayload type instance.
 func (ut *MessagePayload) Validate() (err error) {
-
 	if ut.Body == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "body"))
 	}

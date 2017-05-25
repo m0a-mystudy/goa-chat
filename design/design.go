@@ -142,7 +142,7 @@ var _ = Resource("message", func() {
 			Param("offset", Integer)
 		})
 
-		Response(OK, CollectionOf(Message))
+		Response(OK, CollectionOf(MessageWithAccount))
 		Response(NotFound)
 	})
 	Action("post", func() {
@@ -204,25 +204,48 @@ var _ = Resource("account", func() {
 
 })
 
+var MessageWithAccount = MediaType("application/vnd.message_with_account+json", func() {
+	Description("A Message with account")
+
+	Attributes(func() {
+		Attribute("id", Integer)
+		Attribute("body", String)
+		Attribute("postDate", DateTime)
+		Attribute("name", String)
+		Attribute("email", String)
+		Attribute("googleUserID", String)
+		Attribute("image", String)
+	})
+	View("default", func() {
+		Attribute("id")
+		Attribute("body")
+		Attribute("postDate")
+		Attribute("name")
+		Attribute("email")
+		Attribute("googleUserID")
+		Attribute("image")
+	})
+})
+
 var Message = MediaType("application/vnd.message+json", func() {
 	Description("A Message")
 	Reference(MessagePayload)
 	Attributes(func() {
-		Attribute("accountID")
+		Attribute("googleUserID")
 		Attribute("body")
 		Attribute("postDate")
-		Required("accountID", "body", "postDate")
+		Required("googleUserID", "body", "postDate")
 	})
 	View("default", func() {
-		Attribute("accountID")
+		Attribute("googleUserID")
 		Attribute("body")
 		Attribute("postDate")
 	})
 })
 var MessagePayload = Type("MessagePayload", func() {
 
-	Attribute("accountID", Integer, func() {
-		Example(1)
+	Attribute("googleUserID", String, func() {
+		Example("12345678")
 	})
 	Attribute("body", func() {
 		MinLength(1)
@@ -233,7 +256,7 @@ var MessagePayload = Type("MessagePayload", func() {
 		Default("1978-06-30T10:00:00+09:00")
 	})
 
-	Required("accountID", "body", "postDate")
+	Required("body", "postDate")
 })
 
 var Room = MediaType("application/vnd.room+json", func() {

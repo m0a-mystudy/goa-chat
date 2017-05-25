@@ -61,9 +61,8 @@ export default class Room extends React.Component<RoomProps, RoomState> {
     async postRoom() {
         const name = this.state.roomName;
         const description = this.state.roomDescription;
-        const signedtoken = sessionStorage.getItem('signedtoken');        
         const options: {} = {
-            headers: {'Authorization': 'Bearer ' + signedtoken}
+            headers: {'Authorization': 'Bearer ' + sessionStorage.getItem('signedtoken')}
         };
 
         // headers.append('Authorization', 'Basic ' + base64.encode('abe:pass'));

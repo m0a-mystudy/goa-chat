@@ -180,10 +180,10 @@ func NewListMessageContext(ctx context.Context, r *http.Request, service *goa.Se
 }
 
 // OK sends a HTTP response with status code 200.
-func (ctx *ListMessageContext) OK(r MessageCollection) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.message+json; type=collection")
+func (ctx *ListMessageContext) OK(r MessageWithAccountCollection) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.message_with_account+json; type=collection")
 	if r == nil {
-		r = MessageCollection{}
+		r = MessageWithAccountCollection{}
 	}
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
 }

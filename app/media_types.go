@@ -75,14 +75,16 @@ func (mt *Login) Validate() (err error) {
 //
 // Identifier: application/vnd.message+json; view=default
 type Message struct {
-	AccountID int       `form:"accountID" json:"accountID" xml:"accountID"`
-	Body      string    `form:"body" json:"body" xml:"body"`
-	PostDate  time.Time `form:"postDate" json:"postDate" xml:"postDate"`
+	Body         string    `form:"body" json:"body" xml:"body"`
+	GoogleUserID string    `form:"googleUserID" json:"googleUserID" xml:"googleUserID"`
+	PostDate     time.Time `form:"postDate" json:"postDate" xml:"postDate"`
 }
 
 // Validate validates the Message media type instance.
 func (mt *Message) Validate() (err error) {
-
+	if mt.GoogleUserID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "googleUserID"))
+	}
 	if mt.Body == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "body"))
 	}
@@ -96,22 +98,23 @@ func (mt *Message) Validate() (err error) {
 	return
 }
 
-// MessageCollection is the media type for an array of Message (default view)
+// A Message with account (default view)
 //
-// Identifier: application/vnd.message+json; type=collection; view=default
-type MessageCollection []*Message
-
-// Validate validates the MessageCollection media type instance.
-func (mt MessageCollection) Validate() (err error) {
-	for _, e := range mt {
-		if e != nil {
-			if err2 := e.Validate(); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	return
+// Identifier: application/vnd.message_with_account+json; view=default
+type MessageWithAccount struct {
+	Body         *string    `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+	Email        *string    `form:"email,omitempty" json:"email,omitempty" xml:"email,omitempty"`
+	GoogleUserID *string    `form:"googleUserID,omitempty" json:"googleUserID,omitempty" xml:"googleUserID,omitempty"`
+	ID           *int       `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Image        *string    `form:"image,omitempty" json:"image,omitempty" xml:"image,omitempty"`
+	Name         *string    `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	PostDate     *time.Time `form:"postDate,omitempty" json:"postDate,omitempty" xml:"postDate,omitempty"`
 }
+
+// Message_with_accountCollection is the media type for an array of Message_with_account (default view)
+//
+// Identifier: application/vnd.message_with_account+json; type=collection; view=default
+type MessageWithAccountCollection []*MessageWithAccount
 
 // A room (default view)
 //

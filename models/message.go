@@ -17,7 +17,7 @@ func MessagesByOption(db XODB, option MessageParamOption) ([]*Message, error) {
 
 	// sql query
 	var sqlstr = `SELECT ` +
-		`id, room_id, account_id, body, postDate ` +
+		`id, room_id, google_user_id, body, postDate ` +
 		`FROM goa_chat.messages ` +
 		`WHERE room_id = ? `
 
@@ -54,7 +54,73 @@ func MessagesByOption(db XODB, option MessageParamOption) ([]*Message, error) {
 		}
 
 		// scan
-		err = q.Scan(&m.ID, &m.RoomID, &m.AccountID, &m.Body, &m.Postdate)
+		err = q.Scan(&m.ID, &m.RoomID, &m.GoogleUserID, &m.Body, &m.Postdate)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, &m)
+	}
+
+	return res, nil
+}
+
+// MessagesWithAccount represents a row from 'goa_chat.messages_with_account'.
+// type MessagesWithAccount struct {
+// 	ID           int       `json:"id"`             // id
+// 	RoomID       int       `json:"room_id"`        // room_id
+// 	Body         string    `json:"body"`           // body
+// 	Postdate     time.Time `json:"postDate"`       // postDate
+// 	Name         string    `json:"name"`           // name
+// 	Email        string    `json:"email"`          // email
+// 	GoogleUserID string    `json:"google_user_id"` // google_user_id
+// 	Image        []byte    `json:"image"`          // image
+// }
+
+// MessagesWithAccountByOption retrieves a row from 'goa_chat.messages' as a Message.
+func MessagesWithAccountByOption(db XODB, option MessageParamOption) ([]*MessagesWithAccount, error) {
+	var err error
+
+	// sql query
+	var sqlstr = `SELECT ` +
+		`id, room_id, body, postDate, name, email, google_user_id, image ` +
+		`FROM goa_chat.messages_with_account ` +
+		`WHERE room_id = ? `
+
+	var q *sql.Rows
+
+	if option.OrderByPostDate {
+		sqlstr += `ORDER BY postDate DESC `
+	}
+
+	// run query
+	if option.Limit > 0 {
+		sqlstr += `LIMIT ? OFFSET ? `
+		XOLog(sqlstr, option.RoomID, option.Offset, option.Limit)
+		q, err = db.Query(sqlstr, option.RoomID, option.Limit, option.Offset)
+		if err != nil {
+			return nil, err
+		}
+		defer q.Close()
+	} else {
+		sqlstr += `OFFSET ? `
+		XOLog(sqlstr, option.RoomID)
+		q, err := db.Query(sqlstr, option.RoomID, option.Offset)
+		if err != nil {
+			return nil, err
+		}
+		defer q.Close()
+	}
+
+	// load results
+	res := []*MessagesWithAccount{}
+	for q.Next() {
+		m := MessagesWithAccount{}
+
+		// scan
+		// `id, room_id, body, postDate, name, email, google_user_id, image` +
+		err = q.Scan(&m.ID, &m.RoomID, &m.Body, &m.Postdate,
+			&m.Name, &m.Email, &m.GoogleUserID, &m.Image)
 		if err != nil {
 			return nil, err
 		}
