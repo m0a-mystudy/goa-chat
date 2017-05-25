@@ -61,7 +61,11 @@ export default class Room extends React.Component<RoomProps, RoomState> {
     async postRoom() {
         const name = this.state.roomName;
         const description = this.state.roomDescription;
-        // let headers = new Headers();
+        const signedtoken = sessionStorage.getItem('signedtoken');        
+        const options: {} = {
+            headers: {'Authorization': 'Bearer ' + signedtoken}
+        };
+
         // headers.append('Authorization', 'Basic ' + base64.encode('abe:pass'));
         // headers.append('Content-Type', 'application/json');
         // headers.append('Accept', 'application/vnd.room+json');
@@ -78,8 +82,9 @@ export default class Room extends React.Component<RoomProps, RoomState> {
             description,
             name
         } as comm.RoomPayload;
+
         try {
-            await this.roomAPI.roomPost({ payload });
+            await this.roomAPI.roomPost({ payload }, options);
             await this.fetchRooms();
         } catch (e) {
             console.log(e);
@@ -105,24 +110,17 @@ export default class Room extends React.Component<RoomProps, RoomState> {
 
         return (
             <div>
-                {rooms.map(room => {
-                    return (
-                        <Link to={`/room/${room.id}`} key={`${room.name}`} >
-                            <RoomCell room={room} />
-                        </Link>
-                    );
-                })}
+                {
+                    rooms.map(room => (<RoomCell room={room} key={`${room.name}`} />))
+                }
                 name: <textarea value={name} onChange={e => (this.onChangeName(e))} />
                 description: <textarea value={description} onChange={e => (this.onChangeDescription(e))} />
                 <FlatButton onClick={() => (this.postRoom())}> 
                     submit 
                 </FlatButton>
-                <FlatButton onClick={() => {
-                    location.href = '/login';
-                    }}> 
+                <FlatButton onClick={() => ( location.href = '/login' )}> 
                     google login
                 </FlatButton>
-                
             </div>);
     }
 }

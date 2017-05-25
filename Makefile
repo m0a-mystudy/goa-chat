@@ -13,7 +13,7 @@
 DBNAME = goa_chat
 .PHONY: all start depend bootstrap generate models client build run
 
-all: depend clean generate build generate-client
+all: clean generate build generate-client
 
 depend:
 	@glide install
@@ -44,7 +44,7 @@ generate-client:
 	@mv replaced_package.json chat-client-api/package.json
 
 models:
-	@xo mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(DBNAME)  -o models -t ./xo_templates
+	@xo mysql://$(MYSQL_USER):$(MYSQL_PASSWORD)@localhost/$(DBNAME)  -o models --template-path ./xo_template
 
 build:
 	@go build -o chat

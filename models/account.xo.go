@@ -10,10 +10,11 @@ import (
 
 // Account represents a row from 'goa_chat.accounts'.
 type Account struct {
-	Name     string    `json:"name"`     // name
-	Password string    `json:"password"` // password
-	Image    []byte    `json:"image"`    // image
-	Created  time.Time `json:"created"`  // created
+	Name         string    `json:"name"`           // name
+	Email        string    `json:"email"`          // email
+	Image        []byte    `json:"image"`          // image
+	GoogleUserID string    `json:"google_user_id"` // google_user_id
+	Created      time.Time `json:"created"`        // created
 
 	// xo fields
 	_exists, _deleted bool
@@ -40,14 +41,14 @@ func (a *Account) Insert(db XODB) error {
 
 	// sql insert query, primary key must be provided
 	const sqlstr = `INSERT INTO goa_chat.accounts (` +
-		`name, password, image, created` +
+		`name, email, image, google_user_id, created` +
 		`) VALUES (` +
-		`?, ?, ?, ?` +
+		`?, ?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, a.Name, a.Password, a.Image, a.Created)
-	_, err = db.Exec(sqlstr, a.Name, a.Password, a.Image, a.Created)
+	XOLog(sqlstr, a.Name, a.Email, a.Image, a.GoogleUserID, a.Created)
+	_, err = db.Exec(sqlstr, a.Name, a.Email, a.Image, a.GoogleUserID, a.Created)
 	if err != nil {
 		return err
 	}
@@ -74,12 +75,12 @@ func (a *Account) Update(db XODB) error {
 
 	// sql query
 	const sqlstr = `UPDATE goa_chat.accounts SET ` +
-		`password = ?, image = ?, created = ?` +
-		` WHERE name = ?`
+		`name = ?, email = ?, image = ?, created = ?` +
+		` WHERE google_user_id = ?`
 
 	// run query
-	XOLog(sqlstr, a.Password, a.Image, a.Created, a.Name)
-	_, err = db.Exec(sqlstr, a.Password, a.Image, a.Created, a.Name)
+	XOLog(sqlstr, a.Name, a.Email, a.Image, a.Created, a.GoogleUserID)
+	_, err = db.Exec(sqlstr, a.Name, a.Email, a.Image, a.Created, a.GoogleUserID)
 	return err
 }
 
@@ -107,11 +108,11 @@ func (a *Account) Delete(db XODB) error {
 	}
 
 	// sql query
-	const sqlstr = `DELETE FROM goa_chat.accounts WHERE name = ?`
+	const sqlstr = `DELETE FROM goa_chat.accounts WHERE google_user_id = ?`
 
 	// run query
-	XOLog(sqlstr, a.Name)
-	_, err = db.Exec(sqlstr, a.Name)
+	XOLog(sqlstr, a.GoogleUserID)
+	_, err = db.Exec(sqlstr, a.GoogleUserID)
 	if err != nil {
 		return err
 	}
@@ -122,15 +123,41 @@ func (a *Account) Delete(db XODB) error {
 	return nil
 }
 
+// AccountByGoogleUserID retrieves a row from 'goa_chat.accounts' as a Account.
+//
+// Generated from index 'accounts_google_user_id_pkey'.
+func AccountByGoogleUserID(db XODB, googleUserID string) (*Account, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`name, email, image, google_user_id, created ` +
+		`FROM goa_chat.accounts ` +
+		`WHERE google_user_id = ?`
+
+	// run query
+	XOLog(sqlstr, googleUserID)
+	a := Account{
+		_exists: true,
+	}
+
+	err = db.QueryRow(sqlstr, googleUserID).Scan(&a.Name, &a.Email, &a.Image, &a.GoogleUserID, &a.Created)
+	if err != nil {
+		return nil, err
+	}
+
+	return &a, nil
+}
+
 // AccountByName retrieves a row from 'goa_chat.accounts' as a Account.
 //
-// Generated from index 'accounts_name_pkey'.
+// Generated from index 'name_UNIQUE'.
 func AccountByName(db XODB, name string) (*Account, error) {
 	var err error
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`name, password, image, created ` +
+		`name, email, image, google_user_id, created ` +
 		`FROM goa_chat.accounts ` +
 		`WHERE name = ?`
 
@@ -140,7 +167,7 @@ func AccountByName(db XODB, name string) (*Account, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, name).Scan(&a.Name, &a.Password, &a.Image, &a.Created)
+	err = db.QueryRow(sqlstr, name).Scan(&a.Name, &a.Email, &a.Image, &a.GoogleUserID, &a.Created)
 	if err != nil {
 		return nil, err
 	}

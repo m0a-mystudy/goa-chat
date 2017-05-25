@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/goadesign/goa"
@@ -22,16 +21,14 @@ func ToMessageMedia(model *models.Message) *app.Message {
 // MessageController implements the message resource.
 type MessageController struct {
 	*goa.Controller
-	db          *sql.DB
-	connections *WsConnections
+	option *ControllerOptions
 }
 
 // NewMessageController creates a message controller.
-func NewMessageController(service *goa.Service, db *sql.DB, wsc *WsConnections) *MessageController {
+func NewMessageController(service *goa.Service, option *ControllerOptions) *MessageController {
 	return &MessageController{
-		Controller:  service.NewController("MessageController"),
-		db:          db,
-		connections: wsc,
+		Controller: service.NewController("MessageController"),
+		option:     option,
 	}
 }
 
@@ -53,7 +50,7 @@ func (c *MessageController) List(ctx *app.ListMessageContext) error {
 		option.Offset = *ctx.Offset
 	}
 
-	messages, err := models.MessagesByOption(c.db, option)
+	messages, err := models.MessagesByOption(c.option.db, option)
 	if err != nil {
 		return err
 	}
@@ -65,6 +62,9 @@ func (c *MessageController) List(ctx *app.ListMessageContext) error {
 
 // Post runs the post action.
 func (c *MessageController) Post(ctx *app.PostMessageContext) error {
+	db := c.option.db
+	connections := c.option.connections
+
 	m := models.Message{
 		RoomID:    ctx.RoomID,
 		AccountID: ctx.Payload.AccountID,
@@ -72,20 +72,23 @@ func (c *MessageController) Post(ctx *app.PostMessageContext) error {
 		Postdate:  time.Now(),
 	}
 
-	err := m.Insert(c.db)
+	err := m.Insert(db)
 	if err != nil {
 		//return err
 		return ctx.BadRequest()
 	}
-	c.connections.updateRoom(ctx.RoomID)
+	connections.updateRoom(ctx.RoomID)
 	ctx.ResponseData.Header().Set("Location", app.MessageHref(ctx.RoomID, m.ID))
 	return ctx.Created()
 }
 
 // Show runs the show action.
 func (c *MessageController) Show(ctx *app.ShowMessageContext) error {
+	db := c.option.db
+	// connections := c.option.connections
+
 	// if room, ok := c.db.GetRoom(ctx.RoomID); ok {
-	message, err := models.MessageByID(c.db, ctx.MessageID)
+	message, err := models.MessageByID(db, ctx.MessageID)
 	if err != nil {
 		return err
 	}

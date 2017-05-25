@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
-
 	"github.com/goadesign/goa"
 	"github.com/m0a-mystudy/goa-chat/app"
 )
@@ -10,14 +8,14 @@ import (
 // AccountController implements the account resource.
 type AccountController struct {
 	*goa.Controller
-	db *sql.DB
+	option *ControllerOptions
 }
 
 // NewAccountController creates a account controller.
-func NewAccountController(service *goa.Service, db *sql.DB) *AccountController {
+func NewAccountController(service *goa.Service, option *ControllerOptions) *AccountController {
 	return &AccountController{
 		Controller: service.NewController("AccountController"),
-		db:         db,
+		option:     option,
 	}
 }
 

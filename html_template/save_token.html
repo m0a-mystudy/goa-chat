@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title></title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script>
 			console.log('hello save_token');
-			object ={ a:1,b:2,c:3};
-			sessionStorage.setItem('mysave',JSON.stringify(object));
-			let data = sessionStorage.getItem('mysave');
-			let d = JSON.parse(data);
-			console.log(d);
-
+			signedtoken ="{{.}}";
+			sessionStorage.setItem('signedtoken',signedtoken);
+			let data = sessionStorage.getItem('signedtoken');
+			location.href = '/';
 		</script>	
 	</head>
 	<body>
-	
+		save_token
 	</body>
 </html>
